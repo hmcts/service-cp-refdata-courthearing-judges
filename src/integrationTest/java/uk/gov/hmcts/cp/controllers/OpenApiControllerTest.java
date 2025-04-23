@@ -21,10 +21,10 @@ class OpenApiControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @DisplayName("Should /courthouses/{court_id} request with 200 response code")
+    @DisplayName("Should /judges/{judge_id} request with 200 response code")
     @Test
     void shouldCallActuatorAndGet200() throws Exception {
-        mockMvc.perform(get("/courthouses/123"))
+        mockMvc.perform(get("/judges/123"))
             .andDo(print())
             .andExpect(status().isOk());
     }
