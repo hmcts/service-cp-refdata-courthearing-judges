@@ -6,17 +6,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.cp.openapi.api.JudgesApi;
 import uk.gov.hmcts.cp.openapi.model.Judgesschema;
-import uk.gov.hmcts.cp.services.OpenApiService;
+import uk.gov.hmcts.cp.services.JudgesService;
 
 @RestController
 @RequiredArgsConstructor
-public class OpenApiController implements JudgesApi {
+public class JudgesController implements JudgesApi {
 
-    private final OpenApiService openApiService;
+    private final JudgesService judgesService;
 
     @Override
     public ResponseEntity<Judgesschema> getJudgeById(String courtId) {
-        Judgesschema judgesschema = openApiService.getJudge(courtId);
+        Judgesschema judgesschema = judgesService.getJudge(courtId);
         return new ResponseEntity<>(judgesschema, HttpStatus.OK);
     }
 
