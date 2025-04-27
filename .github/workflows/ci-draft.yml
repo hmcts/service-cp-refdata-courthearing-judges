@@ -1,0 +1,92 @@
+name: CI Build and Publish Increments Draft
+
+on:
+  pull_request:
+    branches:
+      - master
+      - main
+
+jobs:
+  Artefact-Version:
+    runs-on: ubuntu-latest
+    outputs:
+      draft_version: ${{ steps.vars.outputs.draft_version }}
+      latest_tag: ${{ steps.vars.outputs.latest_tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Show Git tags and commit context (diagnostic/debug)
+        run: git tag --list && git log --oneline --decorate
+
+      - name: Get short SHA for versioning
+        id: vars
+        run: |
+          if [ -n "$(git tag)" ]; then
+            LATEST_TAG=$(git describe --tags --abbrev=0)
+          else
+            LATEST_TAG="v0.0.0"
+          fi
+          LATEST_TAG="${LATEST_TAG#v}"
+          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          DRAFT_VERSION="${LATEST_TAG}-${SHORT_SHA}"
+
+          echo "draft_version=$DRAFT_VERSION"
+          echo "draft_version=$DRAFT_VERSION" >> $GITHUB_OUTPUT
+
+  Build:
+    needs: [Artefact-Version]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: current
+
+      #      - name: Set Sonar Project Key and Name
+      #        id: sonar_vars
+      #        run: |
+      #          repo_sanitized="${GITHUB_REPOSITORY//\//_}"
+      #          echo "project_key=$repo_sanitized" >> $GITHUB_OUTPUT
+      #          echo "project_name=$repo_sanitized" >> $GITHUB_OUTPUT
+      #
+      #      - name: Analyze with SonarCloud
+      #        uses: SonarSource/sonarqube-scan-action@v5.1.0
+      #        with:
+      #          args: >
+      #            -Dsonar.organization=hmcts
+      #            -Dsonar.projectKey=${{ steps.sonar_vars.outputs.project_key }}
+      #            -Dsonar.projectName=${{ steps.sonar_vars.outputs.project_name }}
+      #            -Dsonar.projectVersion=${{ needs.Artefact-Version.outputs.draft_version }}
+      #            -Dsonar.sources=src
+      #            -Dsonar.java.binaries=build/classes
+      #        env:
+      #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Gradle Build and Publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=${{ needs.Artefact-Version.outputs.draft_version }}
+          VERSION=${VERSION#v}
+
+          gradle build publish \
+            -DAPI_SPEC_VERSION=$VERSION \
+            -DGITHUB_REPOSITORY=${{ github.repository }} \
+            -DGITHUB_ACTOR=${{ github.actor }} \
+            -DGITHUB_TOKEN=$GITHUB_TOKEN
