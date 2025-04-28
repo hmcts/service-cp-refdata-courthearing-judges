@@ -5,6 +5,10 @@ on:
     branches:
       - master
       - main
+  push:
+    branches:
+      - master
+      - main
 
 jobs:
   Artefact-Version:
@@ -90,3 +94,27 @@ jobs:
             -DGITHUB_REPOSITORY=${{ github.repository }} \
             -DGITHUB_ACTOR=${{ github.actor }} \
             -DGITHUB_TOKEN=$GITHUB_TOKEN
+
+      - name: Gradle Build and Publish on Push [Merge]
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=${{ needs.Artefact-Version.outputs.draft_version }}
+          VERSION=${VERSION#v}
+      
+          gradle build \
+            -DAPI_SPEC_VERSION=$VERSION \
+            -DGITHUB_REPOSITORY=${{ github.repository }} \
+            -DGITHUB_ACTOR=${{ github.actor }} \
+            -DGITHUB_TOKEN=$GITHUB_TOKEN
+      
+          if [ "${{ github.event_name }}" == "push" ]; then
+            echo "Push event trigger - Publishing artefact"
+            gradle publish \
+              -DAPI_SPEC_VERSION=$VERSION \
+              -DGITHUB_REPOSITORY=${{ github.repository }} \
+              -DGITHUB_ACTOR=${{ github.actor }} \
+              -DGITHUB_TOKEN=$GITHUB_TOKEN
+          else
+            echo "Skipping publish because this is a pull_request"
+          fi
