@@ -21,9 +21,9 @@ resources:
     - repository: cppAzureDevOpsTemplates
       type: github
       name: hmcts/cpp-azure-devops-templates
-      endpoint: 'hmcts'
-      # ref: 'main'
-      ref: 'users/chakrab/ado-gh-auth'
+      endpoint: 'GitHub-OAuth'
+      ref: 'main'
+      # ref: 'users/chakrab/ado-gh-auth'
 
 pool:
   name: "MDV-ADO-AGENT-AKS-01"
