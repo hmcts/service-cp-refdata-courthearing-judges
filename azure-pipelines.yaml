@@ -13,8 +13,8 @@ trigger:
 pr:
   - '*'
 
-variables:
-  - group: victim-pathfinder-vg
+# variables:
+#   - group: victim-pathfinder-vg
 
 resources:
   repositories:
