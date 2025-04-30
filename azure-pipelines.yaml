@@ -13,13 +13,17 @@ trigger:
 pr:
   - '*'
 
+variables:
+  - group: victim-pathfinder-vg
+
 resources:
   repositories:
     - repository: cppAzureDevOpsTemplates
       type: github
       name: hmcts/cpp-azure-devops-templates
       endpoint: 'hmcts'
-      ref: 'main'
+      # ref: 'main'
+      ref: 'users/chakrab/ado-gh-auth'
 
 pool:
   name: "MDV-ADO-AGENT-AKS-01"
