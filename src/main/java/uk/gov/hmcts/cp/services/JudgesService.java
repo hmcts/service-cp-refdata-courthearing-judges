@@ -5,7 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.cp.openapi.model.Judges;
-import uk.gov.hmcts.cp.openapi.model.Judiciary;
+import uk.gov.hmcts.cp.openapi.model.JudgesJudiciary;
+import uk.gov.hmcts.cp.openapi.model.JudgesJudiciary.RoleEnum;
 import java.util.UUID;
 
 @Service
@@ -25,11 +26,12 @@ public class JudgesService implements StubbedJudges {
     }
 
     public Judges getStubbedJudge() {
-        Judiciary judiciary = new Judiciary();
-        judiciary.setJohKnownAs("JohKnownAs");
-        judiciary.setRole(Judiciary.RoleEnum.JUDGE);
-        judiciary.setJohNameSurname("Surname");
-        judiciary.setJohTitle("Judge");
+        JudgesJudiciary judiciary = JudgesJudiciary.builder()
+                .johTitle("His Honour")
+                .johNameSurname("John Smith")
+                .role(RoleEnum.fromValue("judge"))
+                .johKnownAs("His Honour Judge Smith")
+                .build();
         Judges judges = new Judges();
         judges.setJudiciary(judiciary);
 

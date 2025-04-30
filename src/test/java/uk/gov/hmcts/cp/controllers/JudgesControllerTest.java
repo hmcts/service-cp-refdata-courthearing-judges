@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.cp.openapi.model.Judges;
-import uk.gov.hmcts.cp.openapi.model.Judiciary;
+import uk.gov.hmcts.cp.openapi.model.JudgesJudiciary;
 import uk.gov.hmcts.cp.services.JudgesService;
 import java.util.UUID;
 
@@ -36,11 +36,12 @@ class JudgesControllerTest {
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
-        Judiciary judiciary = new Judiciary();
-        judiciary.setJohKnownAs("JohKnownAs");
-        judiciary.setRole(Judiciary.RoleEnum.JUDGE);
-        judiciary.setJohNameSurname("Surname");
-        judiciary.setJohTitle("Judge");
+        JudgesJudiciary judiciary = JudgesJudiciary.builder()
+                .johTitle("His Honour")
+                .johNameSurname("John Smith")
+                .role(JudgesJudiciary.RoleEnum.JUDGE)
+                .johKnownAs("His Honour Judge Smith")
+                .build();
         Judges stubbedJudges = new Judges();
         stubbedJudges.setJudiciary(judiciary);
 
