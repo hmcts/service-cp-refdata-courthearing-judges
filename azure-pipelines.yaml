@@ -1,11 +1,10 @@
 name: CPP Context Verify & Validation
 
-# Need to update this for actual migration
 trigger:
   branches:
     include:
       - master
-      - 'team/*'
+      - main
   paths:
     include:
       - '*'
@@ -18,7 +17,7 @@ resources:
     - repository: cppAzureDevOpsTemplates
       type: github
       name: hmcts/cpp-azure-devops-templates
-      endpoint: 'hmcts'
+      endpoint: 'GitHub-OAuth'
       ref: 'main'
 
 pool:
