@@ -17,5 +17,5 @@ COPY $JAR_FILE_NAME /opt/app/$JAR_FILE_BASENAME
 COPY lib/applicationinsights.json /opt/app/
 
 EXPOSE 4550
-RUN chmod 755 /opt/app/$JAR_FILE_NAME
-CMD sh -c "java -jar /opt/app/$JAR_FILE_NAME"
+RUN chmod 755 /opt/app/$JAR_FILE_BASENAME
+CMD sh -c "java -jar /opt/app/$JAR_FILE_BASENAME"
