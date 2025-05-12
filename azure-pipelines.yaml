@@ -3,14 +3,8 @@ name: CPP Context Verify & Validation
 trigger:
   branches:
     include:
-      - master
       - main
-  paths:
-    include:
-      - '*'
-
-pr:
-  - '*'
+      - master
 
 resources:
   repositories:
@@ -29,4 +23,3 @@ stages:
     - template: pipelines/vp-build.yaml@cppAzureDevOpsTemplates
       parameters:
         repo: "$(Build.Repository.Name)"
-
