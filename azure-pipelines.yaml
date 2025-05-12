@@ -1,10 +1,12 @@
-name: CPP Context Verify & Validation
+name: Build Container
 
 trigger:
   branches:
     include:
       - main
       - master
+
+pr: none
 
 resources:
   repositories:
