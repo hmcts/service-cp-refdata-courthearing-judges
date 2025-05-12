@@ -47,6 +47,9 @@ jobs:
   Build:
     needs: [Artefact-Version]
     runs-on: ubuntu-latest
+    outputs:
+      repo_name: ${{ steps.repo_vars.outputs.repo_name }}
+      artefact_name: ${{ steps.repo_vars.outputs.artefact_name }}
 
     steps:
       - name: Checkout source code
@@ -108,21 +111,24 @@ jobs:
           fi
 
       - name: Extract repo name
-        if: github.event_name == 'push'
+        #if: github.event_name == 'push'
         id: repo_vars
-        run: echo "repo_name=${GITHUB_REPOSITORY##*/}" >> $GITHUB_OUTPUT
+        run: |
+          repo_name=${GITHUB_REPOSITORY##*/}
+          echo "repo_name=${repo_name}" >> $GITHUB_OUTPUT
+          echo "artefact_name=${repo_name}-${{ needs.Artefact-Version.outputs.draft_version }}" >> $GITHUB_OUTPUT
 
       - name: Upload JAR Artefact
         uses: actions/upload-artifact@v4
-        if: github.event_name == 'push'
+        #if: github.event_name == 'push'
         with:
           name: app-jar
-          path: build/libs/${{ steps.repo_vars.outputs.repo_name }}-${{ needs.Artefact-Version.outputs.draft_version }}.jar
+          path: build/libs/${{ steps.repo_vars.outputs.artefact_name }}.jar
 
   Build-Docker:
-    needs: [ Build ]
+    needs: [ Build, Artefact-Version ]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    #if: github.event_name == 'push'
 
     steps:
       - name: Checkout Code
@@ -144,10 +150,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up JAR_FILE_NAME
-        id: jar_vars
-        run: echo "jar_name=build/libs/${{ steps.repo_vars.outputs.repo_name }}-${{ needs.Artefact-Version.outputs.draft_version }}.jar" >> $GITHUB_OUTPUT
-
       - name: Build and Push Docker Image to GitHub & Azure
         uses: docker/build-push-action@v6
         with:
@@ -158,7 +160,7 @@ jobs:
             ghcr.io/${{ github.repository }}:${{ needs.Artefact-Version.outputs.draft_version }}
           build-args: |
             BASE_IMAGE=openjdk:21-jdk-slim
-            JAR_FILE_NAME=${{ steps.jar_vars.outputs.jar_name }}
+            JAR_FILE_NAME=build/libs/${{ needs.Build.outputs.artefact_name }}.jar
 
 #      - name: Log in to Azure Container Registry
 #        uses: docker/login-action@v3
