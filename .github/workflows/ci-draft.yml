@@ -108,6 +108,7 @@ jobs:
           fi
 
       - name: Extract repo name
+        if: github.event_name == 'push'
         id: repo_vars
         run: echo "repo_name=${GITHUB_REPOSITORY##*/}" >> $GITHUB_OUTPUT
 
