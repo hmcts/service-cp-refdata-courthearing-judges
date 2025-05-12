@@ -110,9 +110,11 @@ jobs:
       - name: Upload JAR Artefact
         uses: actions/upload-artifact@v4
         if: github.event_name == 'push'
+        env:
+          GITHUB_REPO: ${{ github.repository##*/ }}
         with:
           name: app-jar
-          path: build/libs/${{ github.repository }}-${{ needs.Artefact-Version.outputs.draft_version }}.jar
+          path: build/libs/${GITHUB_REPO}-${{ needs.Artefact-Version.outputs.draft_version }}.jar
 
   Build-Docker:
     needs: [ Build ]
