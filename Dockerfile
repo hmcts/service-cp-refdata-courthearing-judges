@@ -9,7 +9,7 @@ ENV JAR_FILE_NAME=$JAR_FILE_NAME
 
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
-COPY build/libs/$JAR_FILE_NAME /opt/app/
+COPY $JAR_FILE_NAME /opt/app/
 COPY lib/applicationinsights.json /opt/app/
 
 EXPOSE 4550
