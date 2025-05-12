@@ -1,24 +1,19 @@
-name: CPP Context Verify & Validation
+name: Build Container
 
-# Need to update this for actual migration
 trigger:
   branches:
     include:
+      - main
       - master
-      - 'team/*'
-  paths:
-    include:
-      - '*'
 
-pr:
-  - '*'
+pr: none
 
 resources:
   repositories:
     - repository: cppAzureDevOpsTemplates
       type: github
       name: hmcts/cpp-azure-devops-templates
-      endpoint: 'hmcts'
+      endpoint: 'GitHub-OAuth'
       ref: 'main'
 
 pool:
@@ -30,4 +25,3 @@ stages:
     - template: pipelines/vp-build.yaml@cppAzureDevOpsTemplates
       parameters:
         repo: "$(Build.Repository.Name)"
-

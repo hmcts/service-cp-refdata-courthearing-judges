@@ -4,7 +4,8 @@ ARG APP_INSIGHTS_AGENT_VERSION=3.7.2
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE:-crmdvrepo01.azurecr.io/registry.hub.docker.com/library/openjdk:21-jdk-slim}
 
-ENV JAR_FILE_NAME=service-cp-refdata-courthearing-judges.jar
+ARG JAR_FILE_NAME=service-cp-refdata-courthearing-judges.jar
+ENV JAR_FILE_NAME=$JAR_FILE_NAME
 
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
