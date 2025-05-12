@@ -144,6 +144,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set up JAR_FILE_NAME
+        id: jar_vars
+        run: echo "jar_name=build/libs/${{ steps.repo_vars.outputs.repo_name }}-${{ needs.Artefact-Version.outputs.draft_version }}.jar" >> $GITHUB_OUTPUT
+
       - name: Build and Push Docker Image to GitHub & Azure
         uses: docker/build-push-action@v6
         with:
@@ -154,7 +158,7 @@ jobs:
             ghcr.io/${{ github.repository }}:${{ needs.Artefact-Version.outputs.draft_version }}
           build-args: |
             BASE_IMAGE=openjdk:21-jdk-slim
-            JAR_FILE_NAME=${{ github.repository }}:${{ needs.Artefact-Version.outputs.draft_version }}
+            JAR_FILE_NAME=${{ steps.jar_vars.outputs.jar_name }}
 
 #      - name: Log in to Azure Container Registry
 #        uses: docker/login-action@v3
