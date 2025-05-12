@@ -1,6 +1,6 @@
 # ---- Base image (default fallback) ----
 ARG BASE_IMAGE
-FROM ${BASE_IMAGE:-crmdvrepo01.azurecr.io/registry.hub.docker.com/library/openjdk:21-jdk-slim}
+FROM ${BASE_IMAGE:-openjdk:21-jdk-slim}
 
 # ---- Runtime arguments ----
 ARG JAR_FILENAME=app.jar
