@@ -14,7 +14,6 @@ resources:
       type: github
       name: hmcts/cpp-azure-devops-templates
       endpoint: 'GitHub-OAuth'
-      # ref: 'main'
       ref: 'teams/vp/chakrab/vpbuildpipeline'
 
 variables:
@@ -28,6 +27,6 @@ pool:
   vmImage: 'ubuntu-latest'
 
 stages:
-    - template: pipelines/vp-build.yaml@cppAzureDevOpsTemplates
-      parameters:
-        repo: "$(Build.Repository.Name)"
+  - template: pipelines/vp-build.yaml@cppAzureDevOpsTemplates
+    parameters:
+      repo: $(Build.Repository.Name)
