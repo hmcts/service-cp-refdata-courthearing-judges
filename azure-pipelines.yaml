@@ -16,6 +16,9 @@ resources:
       endpoint: 'GitHub-OAuth'
       ref: 'main'
 
+variables:
+  - group: hmcts-crime-gh-ado-vg
+
 pool:
   name: "MDV-ADO-AGENT-AKS-01"
   demands:
