@@ -14,18 +14,17 @@ resources:
       type: github
       name: hmcts/cpp-azure-devops-templates
       endpoint: 'GitHub-OAuth'
-      # ref: 'main'
       ref: 'teams/vp/chakrab/vpbuildpipeline'
 
 variables:
   - group: hmcts-crime-gh-ado-vg
 
 pool:
-  name: "MDV-ADO-AGENT-AKS-01"
+  name: MDV-ADO-AGENT-AKS-01
   demands:
-    - identifier -equals ubuntu-j21
+    - identifier=ubuntu-j21
 
 stages:
-    - template: pipelines/vp-build.yaml@cppAzureDevOpsTemplates
-      parameters:
-        repo: "$(Build.Repository.Name)"
+  - template: pipelines/vp-build.yaml@cppAzureDevOpsTemplates
+    parameters:
+      repo: $(Build.Repository.Name)
