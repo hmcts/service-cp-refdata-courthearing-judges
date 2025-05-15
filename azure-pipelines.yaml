@@ -14,7 +14,11 @@ resources:
       type: github
       name: hmcts/cpp-azure-devops-templates
       endpoint: 'GitHub-OAuth'
-      ref: 'main'
+      # ref: 'main'
+      ref: 'teams/vp/chakrab/vpbuildpipeline'
+
+variables:
+  - group: hmcts-crime-gh-ado-vg
 
 pool:
   name: "MDV-ADO-AGENT-AKS-01"
