@@ -20,10 +20,12 @@ resources:
 variables:
   - group: hmcts-crime-gh-ado-vg
 
+# pool:
+#   name: "MDV-ADO-AGENT-AKS-01"
+#   demands:
+#     - identifier -equals ubuntu-j21
 pool:
-  name: "MDV-ADO-AGENT-AKS-01"
-  demands:
-    - identifier -equals ubuntu-j21
+  vmImage: 'ubuntu-latest'
 
 stages:
     - template: pipelines/vp-build.yaml@cppAzureDevOpsTemplates
