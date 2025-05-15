@@ -195,7 +195,7 @@ ext {
 dependencies {
   implementation "uk.gov.hmcts.cp:api-cp-refdata-courthearing-judges:$apiJudgesVersion"
   implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8'
-  implementation 'io.swagger.core.v3:swagger-core:2.2.30'
+  implementation 'io.swagger.core.v3:swagger-core:2.2.31'
 
   implementation 'org.springframework.boot:spring-boot-starter-web'
   implementation 'org.springframework.boot:spring-boot-starter-actuator'
@@ -210,7 +210,7 @@ dependencies {
   implementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
   implementation group: 'ch.qos.logback', name: 'logback-core', version: logbackVersion
 
-  implementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.1'
+  implementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.2'
   implementation 'org.hibernate.validator:hibernate-validator:8.0.2.Final'
   implementation 'org.apache.commons:commons-lang3:3.17.0'
 
