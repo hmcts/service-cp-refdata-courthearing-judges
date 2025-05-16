@@ -1,10 +1,10 @@
 name: Build Container
 
-trigger:
-  branches:
-    include:
-      - main
-      - master
+trigger: none
+#  branches:
+#    include:
+#      - main
+#      - master
 
 pr: none
 
