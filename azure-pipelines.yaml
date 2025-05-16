@@ -3,8 +3,8 @@ name: Build Container
 trigger:
   branches:
     include:
-      - main
-      - master
+      - !main
+      - !master
 
 pr: none
 

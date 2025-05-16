@@ -63,27 +63,6 @@ jobs:
         with:
           gradle-version: current
 
-      #      - name: Set Sonar Project Key and Name
-      #        id: sonar_vars
-      #        run: |
-      #          repo_sanitized="${GITHUB_REPOSITORY//\//_}"
-      #          echo "project_key=$repo_sanitized" >> $GITHUB_OUTPUT
-      #          echo "project_name=$repo_sanitized" >> $GITHUB_OUTPUT
-      #
-      #      - name: Analyze with SonarCloud
-      #        uses: SonarSource/sonarqube-scan-action@v5.1.0
-      #        with:
-      #          args: >
-      #            -Dsonar.organization=hmcts
-      #            -Dsonar.projectKey=${{ steps.sonar_vars.outputs.project_key }}
-      #            -Dsonar.projectName=${{ steps.sonar_vars.outputs.project_name }}
-      #            -Dsonar.projectVersion=${{ needs.Artefact-Version.outputs.draft_version }}
-      #            -Dsonar.sources=src
-      #            -Dsonar.java.binaries=build/classes
-      #        env:
-      #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
       - name: Gradle Build and Publish on Push [Merge]
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -158,3 +137,23 @@ jobs:
           build-args: |
             BASE_IMAGE=openjdk:21-jdk-slim
             JAR_FILENAME=${{ needs.Build.outputs.artefact_name }}.jar
+
+  # https://github.com/marketplace/actions/azure-pipelines-action
+  Deploy:
+    needs: [ Build, Artefact-Version ]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Trigger ADO pipeline
+        uses: microsoft/azure-pipelines-action@v1
+        with:
+          azure-devops-project-url: 'https://dev.azure.com/hmcts-cpp/cpp-apps'
+          azure-pipeline-name: 'hmcts/cpp-azure-devops-templates/pipelines/vp-build.yaml'
+          azure-devops-token: ${{ secrets.HMCTS_ADO_PAT }}
+          azure-pipeline-variables: |
+            {            
+              "GROUP_ID" : "uk.gov.hmcts.cp",
+              "ARTIFACT_ID" : "${{ github.repository }}",
+              "ARTIFACT_VERSION" : "${{ needs.Artefact-Version.outputs.draft_version}}"
+            }
