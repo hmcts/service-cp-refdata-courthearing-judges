@@ -146,7 +146,7 @@ jobs:
 
     steps:
       - name: Trigger ADO pipeline
-        uses: microsoft/azure-pipelines-action@v1
+        uses: Azure/pipelines@v1
         with:
           azure-devops-project-url: 'https://dev.azure.com/hmcts-cpp/cpp-apps'
           azure-pipeline-name: 'hmcts/cpp-azure-devops-templates/pipelines/vp-build.yaml'
