@@ -185,7 +185,7 @@ application {
 }
 
 ext {
-  apiJudgesVersion="0.2.0"
+  apiJudgesVersion="0.2.1"
   log4JVersion = "2.24.3"
   logbackVersion = "1.5.18"
   lombokVersion = "1.18.38"
