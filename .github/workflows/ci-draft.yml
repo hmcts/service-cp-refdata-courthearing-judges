@@ -149,7 +149,7 @@ jobs:
         uses: Azure/pipelines@v1
         with:
           azure-devops-project-url: 'https://dev.azure.com/hmcts-cpp/cpp-apps'
-          azure-pipeline-name: 'hmcts.cp-gh-artifact-to-acr'
+          azure-pipeline-name: 'cp-gh-artifact-to-acr'
           azure-devops-token: ${{ secrets.HMCTS_ADO_PAT }}
           azure-pipeline-variables: |
             {            
