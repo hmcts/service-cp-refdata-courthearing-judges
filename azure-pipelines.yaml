@@ -26,5 +26,8 @@ pool:
 stages:
     - template: pipelines/gh-artifact-to-acr.yaml@cppAzureDevOpsTemplates
       parameters:
-        repo: "$(Build.Repository.Name)"
+        ARTIFACT_ID: "$(Build.Repository.Name)"
+        GROUP_ID: "uk.gov.hmcts.cp"
+        ARTIFACT_VERSION: "$(Build.BuildId)"
+        
 
