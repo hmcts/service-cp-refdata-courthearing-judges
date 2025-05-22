@@ -151,9 +151,4 @@ jobs:
           azure-devops-project-url: 'https://dev.azure.com/hmcts-cpp/cpp-apps'
           azure-pipeline-name: 'cp-gh-artifact-to-acr'
           azure-devops-token: ${{ secrets.HMCTS_ADO_PAT }}
-          azure-pipeline-variables: |
-            {            
-              "GROUP_ID" : "uk.gov.hmcts.cp",
-              "ARTIFACT_ID" : "${{ github.repository }}",
-              "ARTIFACT_VERSION" : "${{ needs.Artefact-Version.outputs.draft_version}}"
-            }
+          azure-pipeline-variables: '{ "GROUP_ID" : "uk.gov.hmcts.cp", "ARTIFACT_ID" : "${{ github.repository }}", "ARTIFACT_VERSION" : "${{ needs.Artefact-Version.outputs.draft_version}}"}'
