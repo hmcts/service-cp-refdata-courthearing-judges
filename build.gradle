@@ -2,11 +2,11 @@ plugins {
   id 'application'
   id 'java'
   id 'io.spring.dependency-management' version '1.1.7'
-  id 'org.springframework.boot' version '3.4.5'
+  id 'org.springframework.boot' version '3.4.6'
   id 'jacoco'
   id 'maven-publish'
   id "com.github.ben-manes.versions" version "0.52.0"
-  id "org.cyclonedx.bom" version "2.3.0"
+  id "org.cyclonedx.bom" version "2.3.1"
 }
 
 group = 'uk.gov.hmcts.cp'
@@ -210,7 +210,7 @@ dependencies {
   implementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
   implementation group: 'ch.qos.logback', name: 'logback-core', version: logbackVersion
 
-  implementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.2'
+  implementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.5'
   implementation 'org.hibernate.validator:hibernate-validator:9.0.0.Final'
   implementation 'org.apache.commons:commons-lang3:3.17.0'
 
