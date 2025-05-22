@@ -1,5 +1,7 @@
 # Service: CP Reference Data for Court Hearing Judges
 
+[![CI Build and Publish Increments Draft](https://github.com/hmcts/service-cp-refdata-courthearing-judges/actions/workflows/ci-draft.yml/badge.svg)](https://github.com/hmcts/service-cp-refdata-courthearing-judges/actions/workflows/ci-draft.yml)
+
 
 ## 🚀 Installation
 
