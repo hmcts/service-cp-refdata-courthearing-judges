@@ -1,0 +1,33 @@
+name: GH to ADO DevOps Template
+
+# Need to update this for actual migration
+trigger:
+  branches:
+    include:
+      - master
+      - 'team/*'
+  paths:
+    include:
+      - '*'
+
+resources:
+  repositories:
+    - repository: cppAzureDevOpsTemplates
+      type: github
+      name: hmcts/cpp-azure-devops-templates
+      endpoint: 'GitHub-OAuth'
+      ref: 'teams/vp/chakrab/vpbuildpipeline'
+
+pool:
+  name: "MDV-ADO-AGENT-AKS-01"
+  demands:
+    - identifier -equals ubuntu-j21
+
+stages:
+    - template: pipelines/gh-artifact-to-acr.yaml@cppAzureDevOpsTemplates
+      parameters:
+        ARTIFACT_ID: "$(Build.Repository.Name)"
+        GROUP_ID: "uk.gov.hmcts.cp"
+        ARTIFACT_VERSION: "$(Build.BuildId)"
+        
+

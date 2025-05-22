@@ -138,7 +138,7 @@ jobs:
             BASE_IMAGE=openjdk:21-jdk-slim
             JAR_FILENAME=${{ needs.Build.outputs.artefact_name }}.jar
 
-  # https://github.com/marketplace/actions/azure-pipelines-action
+  # https://github.com/marketplace/actions/azure-pipelines-action   
   Deploy:
     needs: [ Build, Artefact-Version ]
     runs-on: ubuntu-latest
