@@ -146,7 +146,7 @@ jobs:
 
     steps:
       - name: Trigger ADO pipeline
-        uses: Azure/pipelines@v1
+        uses: Azure/pipelines@v1.2
         with:
           azure-devops-project-url: 'https://dev.azure.com/hmcts-cpp/cpp-apps'
           azure-pipeline-name: 'cp-gh-artifact-to-acr'
