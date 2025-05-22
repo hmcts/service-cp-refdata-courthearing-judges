@@ -21,9 +21,9 @@ def githubRepo = System.getenv("GITHUB_REPOSITORY")
 //  println "🔐 Configuring GitHub Packages publishing to: https://maven.pkg.github.com/${githubRepo}"
 //}
 //println "GitHub Packages publishing required environment variables:"
-//println " - GITHUB_ACTOR=${githubActor != null ? '✔' : '❌'}"
-//println " - GITHUB_TOKEN=${githubToken != null ? '✔' : '❌'}"
-//println " - GITHUB_REPOSITORY=${githubRepo != null ? '✔' : '❌'}"
+//println " - GITHUB_ACTOR=${githubActor != null ? ' PRESENT ✔' : '❌'}"
+//println " - GITHUB_TOKEN=${githubToken != null ? ' PRESENT ✔' : '❌'}"
+//println " - GITHUB_REPOSITORY=${githubRepo != null ? ' PRESENT ✔' : '❌'}"
 
 java {
   sourceCompatibility = JavaVersion.VERSION_21
@@ -185,7 +185,7 @@ application {
 }
 
 ext {
-  apiJudgesVersion="0.2.1"
+  apiJudgesVersion="0.2.2"
   log4JVersion = "2.24.3"
   logbackVersion = "1.5.18"
   lombokVersion = "1.18.38"
@@ -211,7 +211,7 @@ dependencies {
   implementation group: 'ch.qos.logback', name: 'logback-core', version: logbackVersion
 
   implementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.2'
-  implementation 'org.hibernate.validator:hibernate-validator:8.0.2.Final'
+  implementation 'org.hibernate.validator:hibernate-validator:9.0.0.Final'
   implementation 'org.apache.commons:commons-lang3:3.17.0'
 
   compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
