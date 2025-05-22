@@ -155,5 +155,7 @@ jobs:
             {            
               "GROUP_ID" : "uk.gov.hmcts.cp",
               "ARTIFACT_ID" : "${{ github.repository }}",
-              "ARTIFACT_VERSION" : "${{ needs.Artefact-Version.outputs.draft_version}}"
+              "ARTIFACT_VERSION" : "${{ needs.Artefact-Version.outputs.draft_version}}",
+              "GITHUB_ACTOR" : ${{ github.actor }},
+              "GITHUB_TOKEN" : ${{ secrets.GITHUB_TOKEN }}          
             }
