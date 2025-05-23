@@ -199,7 +199,6 @@ ext {
   log4JVersion = "2.24.3"
   logbackVersion = "1.5.18"
   lombokVersion = "1.18.38"
-  springBootVersion = "3.4.5"
 }
 
 dependencies {
@@ -229,7 +228,7 @@ dependencies {
 
   testImplementation(platform('org.junit:junit-bom:5.12.2'))
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion, {
+  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '3.5.0', {
     exclude group: 'junit', module: 'junit'
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
