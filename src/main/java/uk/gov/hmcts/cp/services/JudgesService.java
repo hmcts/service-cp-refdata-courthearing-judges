@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.cp.openapi.model.Judges;
 import uk.gov.hmcts.cp.openapi.model.JudgesJudiciary;
 import uk.gov.hmcts.cp.openapi.model.JudgesJudiciary.RoleEnum;
+
 import java.util.UUID;
 
 @Service

@@ -26,6 +26,13 @@ java -version
 gradle -v
 ```
 
+#### Add Gradle Wrapper
+
+run `gradle wrapper`
+
+
+```bash
+
 ## 🔑 Environment Setup for Local Builds
 
 To successfully run local builds (e.g., Gradle tasks that interact with GitHub Packages), you must set the following environment variables:
