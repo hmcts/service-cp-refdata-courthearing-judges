@@ -1,14 +1,14 @@
 package uk.gov.hmcts.cp.controllers;
 
-import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.cp.openapi.api.JudgesApi;
 import uk.gov.hmcts.cp.openapi.model.Judges;
 import uk.gov.hmcts.cp.services.JudgesService;
+
 import java.util.UUID;
 
 @RestController
