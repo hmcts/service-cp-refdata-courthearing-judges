@@ -1,5 +1,13 @@
 name: CPP Context Verify & Validation
 
+parameters:
+  - name: GROUP_ID
+    type: string
+  - name: ARTIFACT_ID
+    type: string
+  - name: ARTIFACT_VERSION
+    type: string
+
 # No trigger as being called from other pipelines
 trigger: none
 
@@ -19,5 +27,7 @@ pool:
 stages:
     - template: pipelines/gh-artifact-to-acr.yaml@cppAzureDevOpsTemplates
       parameters:
-        repo: "$(Build.Repository.Name)"
+        GROUP_ID: ${{ parameters.GROUP_ID }}
+        ARTIFACT_ID: ${{ parameters.ARTIFACT_ID }}
+        ARTIFACT_VERSION: ${{ parameters.ARTIFACT_VERSION }}
 
