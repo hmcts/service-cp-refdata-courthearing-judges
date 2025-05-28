@@ -164,7 +164,13 @@ jobs:
       #       }
       - name: Trigger ADO pipeline via REST API
         run: |
-          curl -X POST \
+          echo "Triggering Azure DevOps Pipeline..."
+          ADO_ORG="hmcts-cpp"
+          ADO_PROJECT="cpp-apps"
+          PIPELINE_ID="467"
+          BRANCH="teams/bisy/gh2ado"
+          API_URL="https://dev.azure.com/${ADO_ORG}/${ADO_PROJECT}/_apis/pipelines/${PIPELINE_ID}/runs?api-version=7.1-preview.1"    
+          curl -X POST "$API_URL" \
             -u ":${{ secrets.HMCTS_ADO_PAT }}" \
             -H "Content-Type: application/json" \
             -d '{
@@ -175,9 +181,13 @@ jobs:
                       }
                     }
                   },
-                  "definition": { "id": 467 },
-                  "parameters": "{ \"GROUP_ID\": \"uk.gov.hmcts.cp\", \"ARTIFACT_ID\": \"${{ github.repository }}\" , "ARTIFACT_VERSION\": \"${{ needs.Artefact-Version.outputs.draft_version }}\" }"
-                }' \
-            https://dev.azure.com/hmcts-cpp/cpp-apps/_apis/pipelines/467/runs?api-version=7.1-preview.1
+                    "templateParameters": {
+                      "GROUP_ID":  \"uk.gov.hmcts.cp\",
+                      "ARTIFACT_ID": \"${{ github.repository }}\",
+                      "ARTIFACT_VERSION": \"${{ needs.Artefact-Version.outputs.draft_version }}\"
+                  }
+                }'
       
       
+
+            
