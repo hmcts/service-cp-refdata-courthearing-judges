@@ -9,10 +9,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Trigger ADO pipeline
-        uses: Azure/pipelines@v1.2
-        with:
-          azure-devops-project-url: 'https://dev.azure.com/hmcts-cpp/cpp-apps'
-          azure-pipeline-name: 'cp-gh-artifact-to-acr'
-          azure-devops-token: ${{ secrets.HMCTS_ADO_PAT }}
-          azure-pipeline-variables: '{ "GROUP_ID" : "uk.gov.hmcts.cp", "ARTIFACT_ID" : "${{ github.repository }}", "ARTIFACT_VERSION" : "0.0.999-TESTING-ONLY" }'
+      - name: Install Azure CLI and DevOps extension
+        run: |
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+          az extension add --name azure-devops
+
+      - name: Trigger ADO pipeline using CLI
+        env:
+          AZURE_DEVOPS_EXT_PAT: ${{ secrets.HMCTS_ADO_PAT }}
+        run: |
+          az devops configure --defaults organization=https://dev.azure.com/hmcts-cpp project=cpp-apps
+          
+          az pipelines run \
+            --name cp-gh-artifact-to-acr \
+            --branch main \
+            --variables GROUP_ID=uk.gov.hmcts.cp \
+                        ARTIFACT_ID=${{ github.repository }} \
+                        ARTIFACT_VERSION=0.0.999-TESTING-ONLY
+
+#      - name: Trigger ADO pipeline
+#        uses: Azure/pipelines@v1.2
+#        with:
+#          azure-devops-project-url: 'https://dev.azure.com/hmcts-cpp/cpp-apps'
+#          azure-pipeline-name: 'cp-gh-artifact-to-acr'
+#          azure-devops-token: ${{ secrets.HMCTS_ADO_PAT }}
+#          azure-pipeline-variables: '{ "GROUP_ID" : "uk.gov.hmcts.cp", "ARTIFACT_ID" : "${{ github.repository }}", "ARTIFACT_VERSION" : "0.0.999-TESTING-ONLY" }'

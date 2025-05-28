@@ -1,0 +1,38 @@
+name: Temp test to allow for quick calls to ADO pipeline
+
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger ADO pipeline via REST API
+        env:
+          ADO_ORG: 'hmcts-cpp'
+          ADO_PROJECT: 'cpp-apps'
+          PIPELINE_ID: 'cp-gh-artifact-to-acr'
+          ADO_PAT: ${{ secrets.HMCTS_ADO_PAT }}
+        run: |
+          echo "Triggering ADO pipeline..."
+          
+          curl -X POST \
+            -u ":${ADO_PAT}" \
+            -H "Content-Type: application/json" \
+            https://dev.azure.com/${ADO_ORG}/${ADO_PROJECT}/_apis/pipelines/${PIPELINE_ID}/runs?api-version=7.0 \
+            -d '{
+              "resources": {
+                "repositories": {
+                  "self": {
+                    "refName": "refs/heads/main"
+                  }
+                }
+              },
+              "templateParameters": {
+                "GROUP_ID": "uk.gov.hmcts.cp",
+                "ARTIFACT_ID": "'"${{ github.repository }}"'",
+                "ARTIFACT_VERSION": "0.0.999-TESTING-ONLY"
+              }
+            }'
