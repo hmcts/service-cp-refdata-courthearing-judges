@@ -1,0 +1,36 @@
+name: Temp test to allow for quick calls to ADO pipeline
+
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger ADO pipeline with gh api
+        env:
+          ADO_PAT: ${{ secrets.HMCTS_ADO_PAT }}
+        run: |
+          gh api \
+            --method POST \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Basic $(echo -n ":$ADO_PAT" | base64)" \
+            https://dev.azure.com/hmcts-cpp/cpp-apps/_apis/pipelines/cp-gh-artifact-to-acr/runs?api-version=7.0 \
+            --input - <<EOF
+            {
+              "resources": {
+                "repositories": {
+                  "self": {
+                    "refName": "refs/heads/main"
+                  }
+                }
+              },
+              "templateParameters": {
+                "GROUP_ID": "uk.gov.hmcts.cp",
+                "ARTIFACT_ID": "${{ github.repository }}",
+                "ARTIFACT_VERSION": "0.0.999-TESTING-ONLY"
+              }
+            }
+            EOF
