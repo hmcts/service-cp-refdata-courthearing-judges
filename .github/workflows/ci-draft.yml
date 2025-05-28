@@ -150,15 +150,27 @@ jobs:
     if: github.event_name == 'push'
 
     steps:
-      - name: Trigger ADO pipeline
-        uses: Azure/pipelines@v1.2
-        with:
-          azure-devops-project-url: 'https://dev.azure.com/hmcts-cpp/cpp-apps'
-          azure-pipeline-name: 'cp-gh-artifact-to-acr'
-          azure-devops-token: ${{ secrets.HMCTS_ADO_PAT }}
-          azure-pipeline-variables: >-
-            { 
-              "GROUP_ID" : "uk.gov.hmcts.cp", 
-              "ARTIFACT_ID" : "${{ github.repository }}", 
-              "ARTIFACT_VERSION" : "${{ needs.Artefact-Version.outputs.draft_version}}"
-            }
+      # - name: Trigger ADO pipeline
+      #   uses: Azure/pipelines@v1.2
+      #   with:
+      #     azure-devops-project-url: 'https://dev.azure.com/hmcts-cpp/cpp-apps'
+      #     azure-pipeline-name: 'cp-gh-artifact-to-acr'
+      #     azure-devops-token: ${{ secrets.HMCTS_ADO_PAT }}
+      #     azure-pipeline-variables: >-
+      #       { 
+      #         "GROUP_ID" : "uk.gov.hmcts.cp", 
+      #         "ARTIFACT_ID" : "${{ github.repository }}", 
+      #         "ARTIFACT_VERSION" : "${{ needs.Artefact-Version.outputs.draft_version}}"
+      #       }
+      - name: Trigger ADO pipeline via REST API
+        run: |
+          curl -X POST \
+            -u ":${{ secrets.HMCTS_ADO_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+                  "definition": { "id": 42 },
+                  "parameters": "{ \"GROUP_ID\": \"uk.gov.hmcts.cp\", \"ARTIFACT_ID\": \"${{ github.repository }}\" , "ARTIFACT_VERSION\": \"${{ needs.Artefact-Version.outputs.draft_version }}\" }"
+                }' \
+            https://dev.azure.com/hmcts-cpp/cpp-apps/_apis/build/builds?api-version=7.1-preview.7
+      
+      

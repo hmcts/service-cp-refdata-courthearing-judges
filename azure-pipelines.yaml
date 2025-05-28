@@ -1,0 +1,23 @@
+name: CPP Context Verify & Validation
+
+# No trigger as being called from other pipelines
+trigger: none
+
+resources:
+  repositories:
+    - repository: cppAzureDevOpsTemplates
+      type: github
+      name: hmcts/cpp-azure-devops-templates
+      endpoint: 'GitHub-OAuth'
+      ref: 'teams/vp/chakrab/vpbuildpipeline'
+
+pool:
+  name: "MDV-ADO-AGENT-AKS-01"
+  demands:
+    - identifier -equals ubuntu-j21
+
+stages:
+    - template: pipelines/gh-artifact-to-acr.yaml@cppAzureDevOpsTemplates
+      parameters:
+        repo: "$(Build.Repository.Name)"
+
