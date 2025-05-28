@@ -168,9 +168,16 @@ jobs:
             -u ":${{ secrets.HMCTS_ADO_PAT }}" \
             -H "Content-Type: application/json" \
             -d '{
-                  "definition": { "id": 42 },
+                  "resources": {
+                    "repositories": {
+                      "self": {
+                        "refName": \"teams/bisy/gh2ado\"
+                      }
+                    }
+                  },
+                  "definition": { "id": 467 },
                   "parameters": "{ \"GROUP_ID\": \"uk.gov.hmcts.cp\", \"ARTIFACT_ID\": \"${{ github.repository }}\" , "ARTIFACT_VERSION\": \"${{ needs.Artefact-Version.outputs.draft_version }}\" }"
                 }' \
-            https://dev.azure.com/hmcts-cpp/cpp-apps/_apis/build/builds?api-version=7.1-preview.7
+            https://dev.azure.com/hmcts-cpp/cpp-apps/_apis/pipelines/467/runs?api-version=7.1-preview.1
       
       
