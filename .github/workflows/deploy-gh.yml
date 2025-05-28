@@ -11,15 +11,15 @@ jobs:
     steps:
       - name: Trigger ADO pipeline with gh api
         env:
-          GH_TOKEN: ${{ github.token }}        # Required by gh CLI
-          ADO_PAT: ${{ secrets.HMCTS_ADO_PAT }} # Used for Azure DevOps auth
+          GH_TOKEN: ${{ github.token }}
+          ADO_PAT: ${{ secrets.HMCTS_ADO_PAT }}
         run: |
-          gh api \
+          cat <<EOF | gh api \
             --method POST \
             -H "Content-Type: application/json" \
             -H "Authorization: Basic $(echo -n ":$ADO_PAT" | base64)" \
             https://dev.azure.com/hmcts-cpp/cpp-apps/_apis/pipelines/cp-gh-artifact-to-acr/runs?api-version=7.0 \
-            --input - <<EOF
+            --input -
       {
         "resources": {
           "repositories": {
