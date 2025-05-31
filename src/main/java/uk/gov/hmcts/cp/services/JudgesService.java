@@ -13,27 +13,27 @@ import java.util.UUID;
 @Service
 public class JudgesService implements StubbedJudges {
 
-    private static final Logger log = LoggerFactory.getLogger(JudgesService.class);
-    private final Boolean stubbedJudges = Boolean.parseBoolean(System.getProperty("STUBBED_JUDGES", "true"));
+    private static final Logger LOG = LoggerFactory.getLogger(JudgesService.class);
+    private final Boolean STUBBED_JUDGES = Boolean.parseBoolean(System.getProperty("STUBBED_JUDGES", "true"));
 
-    public Judges getJudge(UUID courtId) {
-        if (stubbedJudges) {
-            log.info("System configured to return stubbed Judge details. Ignoring provided courtId : {}", courtId.toString());
+    public Judges getJudge(final UUID courtId) {
+        if (STUBBED_JUDGES) {
+            LOG.atInfo().log("System configured to return stubbed Judge details. Ignoring provided courtId : {}", courtId.toString());
             return getStubbedJudge();
         }else {
-            log.error("NO REFERENCE DATA SERVICE CONFIGURED AT THIS TIME");
+            LOG.error("NO REFERENCE DATA SERVICE CONFIGURED AT THIS TIME");
             throw new NotImplementedException("NO REFERENCE DATA SERVICE CONFIGURED");
         }
     }
 
     public Judges getStubbedJudge() {
-        JudgesJudiciary judiciary = JudgesJudiciary.builder()
+        final JudgesJudiciary judiciary = JudgesJudiciary.builder()
                 .johTitle("His Honour")
                 .johNameSurname("John Smith")
                 .role(RoleEnum.fromValue("judge"))
                 .johKnownAs("His Honour Judge Smith")
                 .build();
-        Judges judges = new Judges();
+        final Judges judges = new Judges();
         judges.setJudiciary(judiciary);
 
         return judges;

@@ -14,24 +14,28 @@ import java.util.UUID;
 @RestController
 public class JudgesController implements JudgesApi {
 
-    private static final Logger log = LoggerFactory.getLogger(JudgesController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JudgesController.class);
     private final JudgesService judgesService;
 
-    public JudgesController(JudgesService judgesService) {
+    public JudgesController(final JudgesService judgesService) {
         this.judgesService = judgesService;
     }
 
     @Override
-    public ResponseEntity<Judges> getJudgeById(String courtId) {
+    public ResponseEntity<Judges> getJudgeById(final String courtId) {
+        final ResponseEntity<Judges> response;
         if (courtId == null) {
-            log.warn("No court identifier provided: {}", HttpStatus.BAD_REQUEST);
-            return ResponseEntity.badRequest().build();
+            LOG.atWarn().log("No court identifier provided: {}", HttpStatus.BAD_REQUEST);
+            response = ResponseEntity.badRequest().build();
+        } else {
+
+            final UUID cId = UUID.fromString(courtId);
+            LOG.atDebug().log("Received request to fetch judge details for courtId: {}", cId.toString());
+            final Judges judges = judgesService.getJudge(cId);
+            LOG.atDebug().log("Successfully found judge details : {}", judges);
+            response = new ResponseEntity<>(judges, HttpStatus.OK);
         }
-        UUID cId = UUID.fromString(courtId);
-        log.debug("Received request to fetch judge details for courtId: {}", cId.toString());
-        Judges judges = judgesService.getJudge(cId);
-        log.debug("Successfully found judge details : {}", judges);
-        return new ResponseEntity<>(judges, HttpStatus.OK);
+        return response;
     }
 
 }
