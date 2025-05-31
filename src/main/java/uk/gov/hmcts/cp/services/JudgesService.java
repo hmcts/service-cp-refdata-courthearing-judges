@@ -14,10 +14,10 @@ import java.util.UUID;
 public class JudgesService implements StubbedJudges {
 
     private static final Logger LOG = LoggerFactory.getLogger(JudgesService.class);
-    private final Boolean STUBBED_JUDGES = Boolean.parseBoolean(System.getProperty("STUBBED_JUDGES", "true"));
+    private final Boolean stubbedJudges = Boolean.parseBoolean(System.getProperty("STUBBED_JUDGES", "true"));
 
     public Judges getJudge(final UUID courtId) {
-        if (STUBBED_JUDGES) {
+        if (stubbedJudges) {
             LOG.atInfo().log("System configured to return stubbed Judge details. Ignoring provided courtId : {}", courtId.toString());
             return getStubbedJudge();
         }else {
