@@ -112,7 +112,6 @@ jobs:
   Deploy:
     needs: [ Build, Artefact-Version ]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
 
     steps:
       - name: Trigger ADO pipeline
