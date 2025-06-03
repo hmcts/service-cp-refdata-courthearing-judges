@@ -122,6 +122,7 @@ jobs:
           PIPELINE_ID: 460 #cp-gh-artifact-to-acr
           ADO_PAT: ${{ secrets.HMCTS_ADO_PAT }}
         run: |
+          repo_name=${GITHUB_REPOSITORY##*/}
           curl -X POST \
             -u ":${ADO_PAT}" \
             -H "Content-Type: application/json" \
@@ -136,7 +137,7 @@ jobs:
               },
               "templateParameters": {
                 "GROUP_ID": "uk.gov.hmcts.cp",
-                "ARTIFACT_ID": "'"${{ github.repository }}"'",
-                "ARTIFACT_VERSION": "'"${{ needs.Artefact-Version.outputs.RELEASED_VERSION }}"'"
+                "ARTIFACT_ID": "${repo_name}",
+                "ARTIFACT_VERSION": "${{ needs.Artefact-Version.outputs.RELEASED_VERSION}}"
               }
             }'
