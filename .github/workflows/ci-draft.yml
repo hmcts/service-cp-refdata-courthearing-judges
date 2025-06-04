@@ -156,23 +156,24 @@ jobs:
           PIPELINE_ID: 460 #cp-gh-artifact-to-acr
           ADO_PAT: ${{ secrets.HMCTS_ADO_PAT }}
         run: |
-          artefact-version=${{ needs.Artefact-Version.outputs.draft_version }}
-          repo_name=${GITHUB_REPOSITORY##*/}
+          ARTEFACT_VERSION="${{ needs.Artefact-Version.outputs.draft_version }}"
+          REPO_NAME="${GITHUB_REPOSITORY##*/}"
+
           curl -X POST \
             -u ":${ADO_PAT}" \
             -H "Content-Type: application/json" \
             https://dev.azure.com/${ADO_ORG}/${ADO_PROJECT}/_apis/pipelines/${PIPELINE_ID}/runs?api-version=7.0 \
-            -d '{
-              "resources": {
-                "repositories": {
-                  "self": {
-                    "refName": "refs/heads/main"
+            -d "{
+              \"resources\": {
+                \"repositories\": {
+                  \"self\": {
+                    \"refName\": \"refs/heads/main\"
                   }
                 }
               },
-              "templateParameters": {
-                "GROUP_ID": "uk.gov.hmcts.cp",
-                "ARTIFACT_ID": "${repo_name}",
-                "ARTIFACT_VERSION": "${artefact-version}"
+              \"templateParameters\": {
+                \"GROUP_ID\": \"uk.gov.hmcts.cp\",
+                \"ARTIFACT_ID\": \"${REPO_NAME}\",
+                \"ARTIFACT_VERSION\": \"${ARTEFACT_VERSION}\"
               }
-            }'
+            }"
