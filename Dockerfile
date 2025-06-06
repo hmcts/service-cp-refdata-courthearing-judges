@@ -6,8 +6,11 @@ FROM ${BASE_IMAGE:-openjdk:21-jdk-slim}
 ARG JAR_FILENAME=app.jar
 ARG LIBS_FILE_PATH=build/libs
 ENV JAR_FILENAME=$JAR_FILENAME
+ENV LIBS_FILE_PATH=$LIBS_FILE_PATH
 ENV JAR_FILE_PATH=$LIBS_FILE_PATH
 ENV JAR_FULL_PATH=$LIBS_FILE_PATH/$JAR_FILENAME
+
+RUN echo "Using LIBS_FILE_PATH=${LIBS_FILE_PATH}, JAR_FILENAME=${JAR_FILENAME}"
 
 # ---- Dependencies ----
 RUN apt-get update \
@@ -15,8 +18,8 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # ---- Application files ----
-COPY $JAR_FULL_PATH /opt/app/$JAR_FILENAME
-COPY $LIBS_FILE_PATH/applicationinsights.json /opt/app/
+COPY ${LIBS_FILE_PATH}/${JAR_FILENAME} /opt/app/${JAR_FILENAME}
+COPY ${LIBS_FILE_PATH}/applicationinsights.json /opt/app/
 
 # ---- Permissions ----
 RUN chmod 755 /opt/app/$JAR_FILENAME
