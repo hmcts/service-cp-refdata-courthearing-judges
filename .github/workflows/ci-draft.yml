@@ -157,7 +157,8 @@ jobs:
         run: |
           ARTEFACT_VERSION="${{ needs.Artefact-Version.outputs.draft_version }}"
           REPO_NAME="${GITHUB_REPOSITORY##*/}"
-
+          TARGET_REPOSITORY="${GITHUB_REPOSITORY}"
+          
           curl -X POST \
             -u ":${ADO_PAT}" \
             -H "Content-Type: application/json" \
@@ -166,13 +167,14 @@ jobs:
               \"resources\": {
                 \"repositories\": {
                   \"self\": {
-                    \"refName\": \"refs/heads/teams/vp/chakrab/vpbuildpipeline\"
+                    \"refName\": \"refs/heads/main\"
                   }
                 }
               },
               \"templateParameters\": {
                 \"GROUP_ID\": \"uk.gov.hmcts.cp\",
                 \"ARTIFACT_ID\": \"${REPO_NAME}\",
-                \"ARTIFACT_VERSION\": \"${ARTEFACT_VERSION}\"
+                \"ARTIFACT_VERSION\": \"${ARTEFACT_VERSION}\",
+                \"TARGET_REPOSITORY\": \"${TARGET_REPOSITORY}\"
               }
             }"
