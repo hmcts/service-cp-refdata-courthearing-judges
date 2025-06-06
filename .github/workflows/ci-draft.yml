@@ -166,7 +166,7 @@ jobs:
               \"resources\": {
                 \"repositories\": {
                   \"self\": {
-                    \"refName\": \"refs/heads/main\"
+                    \"refName\": \"refs/heads/teams/vp/chakrab/vpbuildpipeline\"
                   }
                 }
               },
