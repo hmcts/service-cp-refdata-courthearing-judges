@@ -87,6 +87,9 @@ jobs:
           name: app-jar
           path: build/libs
 
+      - name: Copy applicationinsights.json to libs
+        run: cp lib/applicationinsights.json build/libs/
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
