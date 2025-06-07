@@ -14,32 +14,16 @@ jobs:
   Artefact-Version:
     runs-on: ubuntu-latest
     outputs:
-      draft_version: ${{ steps.vars.outputs.draft_version }}
-      latest_tag: ${{ steps.vars.outputs.latest_tag }}
+      artefact_version: ${{ steps.artefact.outputs.draft_version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Get short SHA for versioning
-        id: vars
-        run: |
-          if LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null); then
-            :
-          else
-            LATEST_TAG="v0.0.0"
-          fi
-          echo "🏷️ Latest Git tag resolved to: $LATEST_TAG"
-          LATEST_TAG="${LATEST_TAG#v}"
-
-          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
-
-          SHORT_SHA=$(git rev-parse --short HEAD)
-          DRAFT_VERSION="${LATEST_TAG}-${SHORT_SHA}"
-
-          echo "draft_version=$DRAFT_VERSION"
-          echo "draft_version=$DRAFT_VERSION" >> $GITHUB_OUTPUT
+      - name: Generate Artefact Version
+        id: artefact
+        uses: hmcts/artefact-version-action@v1
 
   Build:
     needs: [Artefact-Version]
@@ -69,13 +53,9 @@ jobs:
           AZURE_DEVOPS_ARTIFACT_USERNAME: ${{ secrets.AZURE_DEVOPS_ARTIFACT_USERNAME }}
           AZURE_DEVOPS_ARTIFACT_TOKEN: ${{ secrets.AZURE_DEVOPS_ARTIFACT_TOKEN }}
         run: |
-          VERSION=${{ needs.Artefact-Version.outputs.draft_version }}
+          VERSION=${{ needs.Artefact-Version.outputs.artefact_version }}
 
-          gradle build \
-            -DAPI_SPEC_VERSION=$VERSION \
-            -DGITHUB_REPOSITORY=${{ github.repository }} \
-            -DGITHUB_ACTOR=${{ github.actor }} \
-            -DGITHUB_TOKEN=$GITHUB_TOKEN
+          gradle build -DAPI_SPEC_VERSION=$VERSION
 
           if [ "${{ github.event_name }}" == "push" ]; then
             echo "Push event trigger - Publishing artefact"
@@ -96,7 +76,7 @@ jobs:
         run: |
           repo_name=${GITHUB_REPOSITORY##*/}
           echo "repo_name=${repo_name}" >> $GITHUB_OUTPUT
-          echo "artefact_name=${repo_name}-${{ needs.Artefact-Version.outputs.draft_version }}" >> $GITHUB_OUTPUT
+          echo "artefact_name=${repo_name}-${{ needs.Artefact-Version.outputs.artefact_version }}" >> $GITHUB_OUTPUT
 
       - name: Upload JAR Artefact
         uses: actions/upload-artifact@v4
@@ -137,7 +117,7 @@ jobs:
           file: Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:${{ needs.Artefact-Version.outputs.draft_version }}
+            ghcr.io/${{ github.repository }}:${{ needs.Artefact-Version.outputs.artefact_version }}
           build-args: |
             BASE_IMAGE=openjdk:21-jdk-slim
             JAR_FILENAME=${{ needs.Build.outputs.artefact_name }}.jar
@@ -155,7 +135,7 @@ jobs:
           PIPELINE_ID: 460 #cp-gh-artifact-to-acr
           ADO_PAT: ${{ secrets.HMCTS_ADO_PAT }}
         run: |
-          ARTEFACT_VERSION="${{ needs.Artefact-Version.outputs.draft_version }}"
+          ARTEFACT_VERSION="${{ needs.Artefact-Version.outputs.artefact_version }}"
           REPO_NAME="${GITHUB_REPOSITORY##*/}"
           TARGET_REPOSITORY="${GITHUB_REPOSITORY}"
           

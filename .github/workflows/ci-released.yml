@@ -10,17 +10,18 @@ jobs:
   Artefact-Version:
     runs-on: ubuntu-latest
     outputs:
-      RELEASED_VERSION: ${{ steps.vars.outputs.RELEASED_VERSION }}
+      artefact_version: ${{ steps.artefact.outputs.draft_version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Get version from tag
-        id: vars
-        run: |
-          TAG_NAME="${GITHUB_REF#refs/tags/}"
-          VERSION="${TAG_NAME#v}"
-          echo "RELEASED_VERSION=$VERSION" >> $GITHUB_OUTPUT
+      - name: Generate Artefact Version
+        id: artefact
+        uses: hmcts/artefact-version-action@v1
+        with:
+          release: true
 
   Build:
     needs: [Artefact-Version]
@@ -50,7 +51,7 @@ jobs:
           AZURE_DEVOPS_ARTIFACT_USERNAME: ${{ secrets.AZURE_DEVOPS_ARTIFACT_USERNAME }}
           AZURE_DEVOPS_ARTIFACT_TOKEN: ${{ secrets.AZURE_DEVOPS_ARTIFACT_TOKEN }}
         run: |
-          VERSION=${{ needs.Artefact-Version.outputs.RELEASED_VERSION }}
+          VERSION=needs.Artefact-Version.outputs.artefact_version
 
           gradle publish \
               -DAPI_SPEC_VERSION=$VERSION \
@@ -65,7 +66,7 @@ jobs:
         run: |
           repo_name=${GITHUB_REPOSITORY##*/}
           echo "repo_name=${repo_name}" >> $GITHUB_OUTPUT
-          echo "artefact_name=${repo_name}-${{ needs.Artefact-Version.outputs.RELEASED_VERSION }}" >> $GITHUB_OUTPUT
+          echo "artefact_name=${repo_name}-needs.Artefact-Version.outputs.artefact_version" >> $GITHUB_OUTPUT
 
       - name: Upload JAR Artefact
         uses: actions/upload-artifact@v4
@@ -104,7 +105,7 @@ jobs:
           file: Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:${{ needs.Artefact-Version.outputs.RELEASED_VERSION }}
+            ghcr.io/${{ github.repository }}:needs.Artefact-Version.outputs.artefact_version
           build-args: |
             BASE_IMAGE=openjdk:21-jdk-slim
             JAR_FILENAME=${{ needs.Build.outputs.artefact_name }}.jar
@@ -121,7 +122,7 @@ jobs:
           PIPELINE_ID: 460 #cp-gh-artifact-to-acr
           ADO_PAT: ${{ secrets.HMCTS_ADO_PAT }}
         run: |
-          ARTEFACT_VERSION="${{ needs.Artefact-Version.outputs.RELEASED_VERSION }}"
+          ARTEFACT_VERSION="needs.Artefact-Version.outputs.artefact_version"
           REPO_NAME="${GITHUB_REPOSITORY##*/}"
           TARGET_REPOSITORY="${GITHUB_REPOSITORY}"
 
