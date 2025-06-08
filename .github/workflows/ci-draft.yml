@@ -31,7 +31,6 @@ jobs:
     outputs:
       repo_name: ${{ steps.repo_vars.outputs.repo_name }}
       artefact_name: ${{ steps.repo_vars.outputs.artefact_name }}
-
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -49,18 +48,19 @@ jobs:
 
       - name: Gradle Build and Publish on Push [Merge]
         env:
+          API_SPEC_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AZURE_DEVOPS_ARTIFACT_USERNAME: ${{ secrets.AZURE_DEVOPS_ARTIFACT_USERNAME }}
           AZURE_DEVOPS_ARTIFACT_TOKEN: ${{ secrets.AZURE_DEVOPS_ARTIFACT_TOKEN }}
         run: |
-          VERSION=${{ needs.Artefact-Version.outputs.artefact_version }}
+          echo "Building with API_SPEC_VERSION=$API_SPEC_VERSION"
 
-          gradle build -DAPI_SPEC_VERSION=$VERSION
+          gradle build -DAPI_SPEC_VERSION=$API_SPEC_VERSION
 
           if [ "${{ github.event_name }}" == "push" ]; then
             echo "Push event trigger - Publishing artefact"
             gradle publish \
-              -DAPI_SPEC_VERSION=$VERSION \
+              -DAPI_SPEC_VERSION=$API_SPEC_VERSION \
               -DGITHUB_REPOSITORY=${{ github.repository }} \
               -DGITHUB_ACTOR=${{ github.actor }} \
               -DGITHUB_TOKEN=$GITHUB_TOKEN \
@@ -112,12 +112,14 @@ jobs:
 
       - name: Build and Push Docker Image to GitHub
         uses: docker/build-push-action@v6
+        env:
+          ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
         with:
           context: .
           file: Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:${{ needs.Artefact-Version.outputs.artefact_version }}
+            ghcr.io/${{ github.repository }}:${ARTEFACT_VERSION}
           build-args: |
             BASE_IMAGE=openjdk:21-jdk-slim
             JAR_FILENAME=${{ needs.Build.outputs.artefact_name }}.jar
@@ -134,8 +136,8 @@ jobs:
           ADO_PROJECT: 'cpp-apps'
           PIPELINE_ID: 460 #cp-gh-artifact-to-acr
           ADO_PAT: ${{ secrets.HMCTS_ADO_PAT }}
+          ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
         run: |
-          ARTEFACT_VERSION="${{ needs.Artefact-Version.outputs.artefact_version }}"
           REPO_NAME="${GITHUB_REPOSITORY##*/}"
           TARGET_REPOSITORY="${GITHUB_REPOSITORY}"
           
