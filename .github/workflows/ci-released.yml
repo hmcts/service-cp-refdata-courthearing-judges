@@ -54,7 +54,7 @@ jobs:
           echo "Building with API_SPEC_VERSION=$API_SPEC_VERSION"
 
           gradle publish \
-              -DAPI_SPEC_VERSION=$VERSION \
+              -DAPI_SPEC_VERSION=$API_SPEC_VERSION \
               -DGITHUB_REPOSITORY=${{ github.repository }} \
               -DGITHUB_ACTOR=${{ github.actor }} \
               -DGITHUB_TOKEN=$GITHUB_TOKEN \
