@@ -23,7 +23,7 @@ jobs:
 
       - name: Generate Artefact Version
         id: artefact
-        uses: hmcts/artefact-version-action@v1
+        uses: hmcts/artefact-version-action@v1.0.1
 
   Build:
     needs: [Artefact-Version]
@@ -33,6 +33,10 @@ jobs:
       artefact_name: ${{ steps.repo_vars.outputs.artefact_name }}
 
     steps:
+      - run: |
+          echo "Debug: artefact_version = ${{ needs.Artefact-Version.outputs.artefact_version }}"
+          echo "Debug: API_SPEC_VERSION = $API_SPEC_VERSION"
+
       - name: Checkout source code
         uses: actions/checkout@v4
 
