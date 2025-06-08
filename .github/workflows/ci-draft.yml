@@ -112,14 +112,12 @@ jobs:
 
       - name: Build and Push Docker Image to GitHub
         uses: docker/build-push-action@v6
-        env:
-          ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
         with:
           context: .
           file: Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:${ARTEFACT_VERSION}
+            ghcr.io/${{ github.repository }}:${{ needs.Artefact-Version.outputs.artefact_version }}
           build-args: |
             BASE_IMAGE=openjdk:21-jdk-slim
             JAR_FILENAME=${{ needs.Build.outputs.artefact_name }}.jar
