@@ -68,16 +68,16 @@ jobs:
 
           gradle build -DARTEFACT_VERSION=$ARTEFACT_VERSION
 
+          if [ -z "AZURE_DEVOPS_ARTIFACT_USERNAME" ]; then
+            echo "::warning::AZURE_DEVOPS_ARTIFACT_USERNAME is null or not set"
+          fi
+        
+          if [ -z "$AZURE_DEVOPS_ARTIFACT_TOKEN" ]; then
+            echo "::warning::AZURE_DEVOPS_ARTIFACT_TOKEN is null or not set"
+          fi
+          
           if [ "${{ inputs.is_publish }}" == "true" ]; then
             echo "Publishing artefact for version: $ARTEFACT_VERSION"
-            
-            if [ -z "AZURE_DEVOPS_ARTIFACT_USERNAME" ]; then
-              echo "::warning::AZURE_DEVOPS_ARTIFACT_USERNAME is null or not set"
-            fi
-          
-            if [ -z "$AZURE_DEVOPS_ARTIFACT_TOKEN" ]; then
-              echo "::warning::AZURE_DEVOPS_ARTIFACT_TOKEN is null or not set"
-            fi
           
             gradle publish \
               -DARTEFACT_VERSION=$ARTEFACT_VERSION \
