@@ -2,6 +2,13 @@ name: CI Build and Publish
 
 on:
   workflow_call:
+    secrets:
+      AZURE_DEVOPS_ARTIFACT_USERNAME:
+        required: true
+      AZURE_DEVOPS_ARTIFACT_TOKEN:
+        required: true
+      HMCTS_ADO_PAT:
+        required: true
     inputs:
       is_release:
         required: false
@@ -66,12 +73,12 @@ jobs:
         run: |
           echo "Building with ARTEFACT_VERSION=$ARTEFACT_VERSION"
 
-          gradle build -DARTEFACT_VERSION=$ARTEFACT_VERSION
+          gradle build -DARTEFACT_VERSION=$ARTEFACT_VERSION 
 
           if [ -z "AZURE_DEVOPS_ARTIFACT_USERNAME" ]; then
             echo "::warning::AZURE_DEVOPS_ARTIFACT_USERNAME is null or not set"
           fi
-        
+          
           if [ -z "$AZURE_DEVOPS_ARTIFACT_TOKEN" ]; then
             echo "::warning::AZURE_DEVOPS_ARTIFACT_TOKEN is null or not set"
           fi
