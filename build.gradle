@@ -226,7 +226,7 @@ dependencies {
   compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
 
-  testImplementation(platform('org.junit:junit-bom:5.13.0'))
+  testImplementation(platform('org.junit:junit-bom:5.13.1'))
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '3.5.0', {
     exclude group: 'junit', module: 'junit'
