@@ -128,19 +128,20 @@ jobs:
     if: github.event_name == 'push'
 
     steps:
+      - name: Extract repo name
+        id: extract_repo
+        run: |
+          echo "REPO_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+
       - name: Trigger ADO pipeline
         uses: hmcts/trigger-ado-pipeline@v1
-        env:
-          REPO_NAME: "${GITHUB_REPOSITORY##*/}"
-          ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
-          TARGET_REPOSITORY: "${GITHUB_REPOSITORY}"
         with:
           pipeline_id: 460 #cp-gh-artifact-to-acr
           ado_pat: ${{ secrets.HMCTS_ADO_PAT }}
           template_parameters: >
             {
               "GROUP_ID": "uk.gov.hmcts.cp",
-              "ARTIFACT_ID": "${REPO_NAME}",
-              "ARTIFACT_VERSION": "${ARTEFACT_VERSION}",
-              "TARGET_REPOSITORY": "${TARGET_REPOSITORY}"
+              "ARTIFACT_ID": "${{ env.REPO_NAME }}",
+              "ARTIFACT_VERSION": "${{ needs.Artefact-Version.outputs.artefact_version }}",
+              "TARGET_REPOSITORY": "${{ github.repository }}"
             }
