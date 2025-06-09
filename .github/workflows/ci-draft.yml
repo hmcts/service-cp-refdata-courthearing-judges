@@ -134,7 +134,7 @@ jobs:
           echo "REPO_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
 
       - name: Trigger ADO pipeline
-        uses: hmcts/trigger-ado-pipeline@v1.0.3
+        uses: hmcts/trigger-ado-pipeline@v1
         with:
           pipeline_id: 460 #cp-gh-artifact-to-acr
           ado_pat: ${{ secrets.HMCTS_ADO_PAT }}
