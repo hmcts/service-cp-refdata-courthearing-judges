@@ -21,7 +21,7 @@ jobs:
   Artefact-Version:
     runs-on: ubuntu-latest
     outputs:
-      artefact_version: ${{ steps.artefact.outputs.version }}
+      artefact_version: ${{ inputs.is_release && steps.artefact.outputs.release_version || steps.artefact.outputs.draft_version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
