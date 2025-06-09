@@ -30,8 +30,10 @@ def azureADOArtifactToken = System.getenv("AZURE_DEVOPS_ARTIFACT_TOKEN")
 //    println " - GITHUB_REPOSITORY=${githubRepo != null ? ' ✔ FOUND' : '❌'}"
 
 println "Azure ADO publishing required environment variables:"
-println " - AZURE_DEVOPS_ARTIFACT_USERNAME=${azureADOArtifactActor ? '❌NULL or EMPTY' : ' ✔ FOUND'}"
-println " - AZURE_DEVOPS_ARTIFACT_TOKEN=${azureADOArtifactToken ? '❌NULL or EMPTY' : ' ✔ FOUND'}"
+println " - AZURE_DEVOPS_ARTIFACT_USERNAME=${!azureADOArtifactActor || azureADOArtifactActor.isBlank() ? '❌NULL or EMPTY' : ' ✔ FOUND'}"
+println " - AZURE_DEVOPS_ARTIFACT_USERNAME=${!azureADOArtifactToken || azureADOArtifactToken.isBlank() ? '❌NULL or EMPTY' : ' ✔ FOUND'}"
+//println " - AZURE_DEVOPS_ARTIFACT_USERNAME=${azureADOArtifactActor ? '❌NULL or EMPTY' : ' ✔ FOUND'}"
+//println " - AZURE_DEVOPS_ARTIFACT_TOKEN=${azureADOArtifactToken ? '❌NULL or EMPTY' : ' ✔ FOUND'}"
 
 
 java {
