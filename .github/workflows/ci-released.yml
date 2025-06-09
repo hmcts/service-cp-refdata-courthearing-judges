@@ -1,134 +1,15 @@
-name: CI Gradle
+name: CI Build and Publish – Release
 
 on:
   release:
     types: [published]
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
-  Artefact-Version:
-    runs-on: ubuntu-latest
-    outputs:
-      artefact_version: ${{ steps.artefact.outputs.release_version }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Generate Artefact Version
-        id: artefact
-        uses: hmcts/artefact-version-action@v1
-        with:
-          release: true
-
-  Build:
-    needs: [Artefact-Version]
-    runs-on: ubuntu-latest
-    outputs:
-      repo_name: ${{ steps.repo_vars.outputs.repo_name }}
-      artefact_name: ${{ steps.repo_vars.outputs.artefact_name }}
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '21'
-
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: current
-
-      - name: Gradle Build and Publish
-        env:
-          API_SPEC_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          AZURE_DEVOPS_ARTIFACT_USERNAME: ${{ secrets.AZURE_DEVOPS_ARTIFACT_USERNAME }}
-          AZURE_DEVOPS_ARTIFACT_TOKEN: ${{ secrets.AZURE_DEVOPS_ARTIFACT_TOKEN }}
-        run: |
-          echo "Building with API_SPEC_VERSION=$API_SPEC_VERSION"
-
-          gradle publish \
-              -DAPI_SPEC_VERSION=$API_SPEC_VERSION \
-              -DGITHUB_REPOSITORY=${{ github.repository }} \
-              -DGITHUB_ACTOR=${{ github.actor }} \
-              -DGITHUB_TOKEN=$GITHUB_TOKEN \
-              -DAZURE_DEVOPS_ARTIFACT_USERNAME=$AZURE_DEVOPS_ARTIFACT_USERNAME \
-              -DAZURE_DEVOPS_ARTIFACT_TOKEN=$AZURE_DEVOPS_ARTIFACT_TOKEN
-
-      - name: Extract repo name
-        id: repo_vars
-        run: |
-          repo_name=${GITHUB_REPOSITORY##*/}
-          echo "repo_name=${repo_name}" >> $GITHUB_OUTPUT
-          echo "artefact_name=${repo_name}-${{ needs.Artefact-Version.outputs.artefact_version }}" >> $GITHUB_OUTPUT
-
-      - name: Upload JAR Artefact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-jar
-          path: build/libs/${{ steps.repo_vars.outputs.artefact_name }}.jar
-
-  Build-Docker:
-    needs: [ Build, Artefact-Version ]
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Download JAR Artefact
-        uses: actions/download-artifact@v4
-        with:
-          name: app-jar
-          path: build/libs
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to GitHub Packages
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and Push Docker Image to GitHub
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: Dockerfile
-          push: true
-          tags: |
-            ghcr.io/${{ github.repository }}:${{ needs.Artefact-Version.outputs.artefact_version }}
-          build-args: |
-            BASE_IMAGE=openjdk:21-jdk-slim
-            JAR_FILENAME=${{ needs.Build.outputs.artefact_name }}.jar
-
-  Deploy:
-    needs: [ Build, Artefact-Version ]
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Extract repo name
-        id: extract_repo
-        run: |
-          echo "REPO_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
-
-      - name: Trigger ADO pipeline
-        uses: hmcts/trigger-ado-pipeline@v1
-        with:
-          pipeline_id: 460 #cp-gh-artifact-to-acr
-          ado_pat: ${{ secrets.HMCTS_ADO_PAT }}
-          template_parameters: >
-            {
-              "GROUP_ID": "uk.gov.hmcts.cp",
-              "ARTIFACT_ID": "${{ env.REPO_NAME }}",
-              "ARTIFACT_VERSION": "${{ needs.Artefact-Version.outputs.artefact_version }}",
-              "TARGET_REPOSITORY": "${{ github.repository }}"
-            }
+  ci-release:
+    uses: ./.github/workflows/ci-build-publish.yml
+    with:
+      is_release: true
+      is_publish: true
+      trigger_docker: true
+      trigger_deploy: true
