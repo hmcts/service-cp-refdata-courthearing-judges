@@ -73,14 +73,12 @@ jobs:
         run: |
           echo "Building with ARTEFACT_VERSION=$ARTEFACT_VERSION"
 
-          gradle build -DARTEFACT_VERSION=$ARTEFACT_VERSION \
-            -DAZURE_DEVOPS_ARTIFACT_USERNAME=$AZURE_DEVOPS_ARTIFACT_USERNAME \
-            -DAZURE_DEVOPS_ARTIFACT_TOKEN=$AZURE_DEVOPS_ARTIFACT_TOKEN
+          gradle build -DARTEFACT_VERSION=$ARTEFACT_VERSION 
 
           if [ -z "AZURE_DEVOPS_ARTIFACT_USERNAME" ]; then
             echo "::warning::AZURE_DEVOPS_ARTIFACT_USERNAME is null or not set"
           fi
-        
+          
           if [ -z "$AZURE_DEVOPS_ARTIFACT_TOKEN" ]; then
             echo "::warning::AZURE_DEVOPS_ARTIFACT_TOKEN is null or not set"
           fi
