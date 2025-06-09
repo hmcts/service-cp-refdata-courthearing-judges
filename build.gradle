@@ -10,7 +10,7 @@ plugins {
 }
 
 group = 'uk.gov.hmcts.cp'
-version = System.getProperty('API_SPEC_VERSION') ?: '0.0.999'
+version = System.getProperty('ARTEFACT_VERSION') ?: '0.0.999'
 
 def githubActor = project.findProperty("github.actor") ?: System.getenv("GITHUB_ACTOR")
 def githubToken = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN")
