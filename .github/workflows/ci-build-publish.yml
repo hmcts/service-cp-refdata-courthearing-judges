@@ -16,7 +16,6 @@ on:
       trigger_deploy:
         required: true
         type: boolean
-    secrets: inherit
 
 jobs:
   Artefact-Version:
