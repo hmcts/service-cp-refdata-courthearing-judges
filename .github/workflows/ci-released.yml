@@ -13,4 +13,3 @@ jobs:
       is_publish: true
       trigger_docker: true
       trigger_deploy: true
-    secrets: inherit
