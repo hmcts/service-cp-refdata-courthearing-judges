@@ -9,7 +9,7 @@ import uk.gov.hmcts.cp.openapi.api.JudgesApi;
 import uk.gov.hmcts.cp.openapi.model.Judges;
 import uk.gov.hmcts.cp.services.JudgesService;
 
-import java.util.UUID;
+import static java.util.UUID.fromString;
 
 @RestController
 public class JudgesController implements JudgesApi {
@@ -22,16 +22,14 @@ public class JudgesController implements JudgesApi {
     }
 
     @Override
-    public ResponseEntity<Judges> getJudgeById(final String courtId) {
+    public ResponseEntity<Judges> getJudgeById(final String judgeId) {
         final ResponseEntity<Judges> response;
-        if (courtId == null) {
+        if (judgeId == null) {
             LOG.atWarn().log("No court identifier provided: {}", HttpStatus.BAD_REQUEST);
             response = ResponseEntity.badRequest().build();
         } else {
-
-            final UUID cId = UUID.fromString(courtId);
-            LOG.atDebug().log("Received request to fetch judge details for courtId: {}", cId.toString());
-            final Judges judges = judgesService.getJudge(cId);
+            LOG.atDebug().log("Received request to fetch judge details for judgeId: {}", judgeId);
+            final Judges judges = judgesService.getJudge(fromString(judgeId));
             LOG.atDebug().log("Successfully found judge details : {}", judges);
             response = new ResponseEntity<>(judges, HttpStatus.OK);
         }

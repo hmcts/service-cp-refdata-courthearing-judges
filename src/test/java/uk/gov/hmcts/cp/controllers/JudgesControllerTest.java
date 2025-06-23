@@ -8,9 +8,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.cp.openapi.model.Judges;
 import uk.gov.hmcts.cp.openapi.model.JudgesJudiciary;
+import uk.gov.hmcts.cp.repository.InMemoryJudgesRepositoryImpl;
+import uk.gov.hmcts.cp.repository.JudgesRepository;
 import uk.gov.hmcts.cp.services.JudgesService;
 import java.util.UUID;
 
+import static java.util.UUID.fromString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -18,16 +21,22 @@ class JudgesControllerTest {
 
     private static final Logger log = LoggerFactory.getLogger(JudgesControllerTest.class);
 
+    private JudgesRepository judgesRepository;
+    private JudgesService judgesService;
+    private JudgesController judgesController;
+
     @BeforeEach
     void setUp() {
+        judgesRepository = new InMemoryJudgesRepositoryImpl();
+        judgesService = new JudgesService(judgesRepository);
+        judgesController = new JudgesController(judgesService);
     }
 
     @Test
     void getJudgeById_ShouldReturnJudgesWithOkStatus() {
-        JudgesController judgesController = new JudgesController(new JudgesService());
-        UUID courtId = UUID.randomUUID();
-        log.info("Calling judgesController.getJudgeById with courtId: {}", courtId);
-        ResponseEntity<?> response = judgesController.getJudgeById(courtId.toString());
+        UUID judgeId = UUID.randomUUID();
+        log.info("Calling judgesController.getJudgeById with judgeId: {}", judgeId.toString());
+        ResponseEntity<?> response = judgesController.getJudgeById(judgeId.toString());
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -46,7 +55,6 @@ class JudgesControllerTest {
 
     @Test
     void getJudgeById_ShouldReturnBadRequestStatus() {
-        JudgesController judgesController = new JudgesController(new JudgesService());
 
         log.info("Calling judgesController.getJudgeById with null courtId");
         ResponseEntity<?> response = judgesController.getJudgeById(null);
