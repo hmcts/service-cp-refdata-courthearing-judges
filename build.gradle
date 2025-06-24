@@ -237,6 +237,15 @@ dependencies {
   testImplementation 'au.com.dius.pact.provider:spring6:4.6.17'
 
   test{
+    useJUnitPlatform {
+      excludeTags 'pact'
+    }
+  }
+
+  tasks.register('pactVerificationTest', Test) {
+    useJUnitPlatform {
+      includeTags 'pact'
+    }
     systemProperty 'pact.broker.url', System.getenv('PACT_BROKER_URL')
     systemProperty 'pact.broker.token', System.getenv('PACT_BROKER_TOKEN')
     systemProperty 'pact.provider.version', System.getenv('GIT_COMMIT') ?: 'dev'
@@ -245,4 +254,6 @@ dependencies {
     systemProperty 'pact.broker.host', System.getenv('PACT_BROKER_HOST')
     systemProperty 'pact.env', System.getenv('PACT_ENV')
   }
+
+
 }

@@ -54,17 +54,6 @@ class JudgesControllerTest {
         assertEquals(stubbedJudges, response.getBody());
     }
 
-   /* @Test
-    void getJudgeById_ShouldReturnBadRequestStatus() {
-
-        log.info("Calling judgesController.getJudgeById with null courtId");
-        ResponseEntity<?> response = judgesController.getJudgeById(null);
-        log.debug("Received response: {}", response);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    }*/
-
     @Test
     void getCourthouseByCourtId_ShouldSanitizeCourtId() {
         String unsanitizedCourtId = UUID.randomUUID().toString();

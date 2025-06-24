@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface JudgesRepository {
 
     Judges getJudges(UUID judgeId);
-    void saveJudges(final UUID judgeId, final Judges judges);
+    void saveJudges(UUID judgeId, Judges judges);
     void clearAll();
 
 }
