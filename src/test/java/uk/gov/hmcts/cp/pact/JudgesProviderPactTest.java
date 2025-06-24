@@ -19,7 +19,6 @@ import uk.gov.hmcts.cp.openapi.model.JudgesJudiciary;
 import uk.gov.hmcts.cp.repository.JudgesRepository;
 
 import java.util.UUID;
-
 import static java.util.UUID.fromString;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -28,9 +27,8 @@ import static java.util.UUID.fromString;
 @Provider("VPJudgesPactProvider")
 @PactBroker(
         scheme = "https",
-        host = "hmcts-dts.pactflow.io",
-        providerBranch = "dev/pactTest",
-        authentication = @PactBrokerAuth(token = "eOmnLAeYytphFMQZIj7hUg")
+        host = "${pact.broker.host}",
+        authentication = @PactBrokerAuth(token = "${pact.broker.token}")
 )
 public class JudgesProviderPactTest {
 
