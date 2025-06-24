@@ -6,28 +6,38 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.cp.openapi.model.Judges;
 import uk.gov.hmcts.cp.openapi.model.JudgesJudiciary;
+import uk.gov.hmcts.cp.repository.InMemoryJudgesRepositoryImpl;
+import uk.gov.hmcts.cp.repository.JudgesRepository;
 import uk.gov.hmcts.cp.services.JudgesService;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static java.util.UUID.fromString;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 class JudgesControllerTest {
 
     private static final Logger log = LoggerFactory.getLogger(JudgesControllerTest.class);
 
+    private JudgesRepository judgesRepository;
+    private JudgesService judgesService;
+    private JudgesController judgesController;
+
     @BeforeEach
     void setUp() {
+        judgesRepository = new InMemoryJudgesRepositoryImpl();
+        judgesService = new JudgesService(judgesRepository);
+        judgesController = new JudgesController(judgesService);
     }
 
     @Test
     void getJudgeById_ShouldReturnJudgesWithOkStatus() {
-        JudgesController judgesController = new JudgesController(new JudgesService());
-        UUID courtId = UUID.randomUUID();
-        log.info("Calling judgesController.getJudgeById with courtId: {}", courtId);
-        ResponseEntity<?> response = judgesController.getJudgeById(courtId.toString());
+        UUID judgeId = UUID.randomUUID();
+        log.info("Calling judgesController.getJudgeById with judgeId: {}", judgeId.toString());
+        ResponseEntity<?> response = judgesController.getJudgeById(judgeId.toString());
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -45,14 +55,23 @@ class JudgesControllerTest {
     }
 
     @Test
-    void getJudgeById_ShouldReturnBadRequestStatus() {
-        JudgesController judgesController = new JudgesController(new JudgesService());
+    void getCourthouseByCourtId_ShouldSanitizeCourtId() {
+        String unsanitizedCourtId = UUID.randomUUID().toString();
+        log.info("Calling judgesController.getJudgeById with unsanitized courtId: {}", unsanitizedCourtId);
 
-        log.info("Calling judgesController.getJudgeById with null courtId");
-        ResponseEntity<?> response = judgesController.getJudgeById(null);
-        log.debug("Received response: {}", response);
-
+        ResponseEntity<Judges> response = judgesController.getJudgeById(unsanitizedCourtId);
         assertNotNull(response);
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        log.debug("Received response: {}", response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void getCourthouseByCourtId_ShouldReturnBadRequestStatus() {
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            judgesController.getJudgeById(null);
+        });
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(exception.getReason()).isEqualTo("judgeId is required");
+        assertThat(exception.getMessage()).isEqualTo("400 BAD_REQUEST \"judgeId is required\"");
     }
 } 

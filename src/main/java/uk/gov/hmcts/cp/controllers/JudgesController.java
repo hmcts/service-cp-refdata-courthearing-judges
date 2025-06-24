@@ -1,15 +1,18 @@
 package uk.gov.hmcts.cp.controllers;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.cp.openapi.api.JudgesApi;
 import uk.gov.hmcts.cp.openapi.model.Judges;
 import uk.gov.hmcts.cp.services.JudgesService;
 
-import java.util.UUID;
+import static java.util.UUID.fromString;
 
 @RestController
 public class JudgesController implements JudgesApi {
@@ -22,20 +25,28 @@ public class JudgesController implements JudgesApi {
     }
 
     @Override
-    public ResponseEntity<Judges> getJudgeById(final String courtId) {
-        final ResponseEntity<Judges> response;
-        if (courtId == null) {
-            LOG.atWarn().log("No court identifier provided: {}", HttpStatus.BAD_REQUEST);
-            response = ResponseEntity.badRequest().build();
-        } else {
+    public ResponseEntity<Judges> getJudgeById(final String judgeId) {
+        final String sanitizedJudgeId;
+        final Judges judges;
 
-            final UUID cId = UUID.fromString(courtId);
-            LOG.atDebug().log("Received request to fetch judge details for courtId: {}", cId.toString());
-            final Judges judges = judgesService.getJudge(cId);
-            LOG.atDebug().log("Successfully found judge details : {}", judges);
-            response = new ResponseEntity<>(judges, HttpStatus.OK);
+       try{
+           sanitizedJudgeId = sanitizeJudgeId(judgeId);
+           judges = judgesService.getJudge(fromString(sanitizedJudgeId));
+       } catch (ResponseStatusException e) {
+           LOG.atError().log(e.getMessage());
+           throw e;
+       }
+        LOG.debug("Found Judge response for judgeId: {}", sanitizedJudgeId);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(judges);
+    }
+
+    private String sanitizeJudgeId(final String judgeId) {
+        if (judgeId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "judgeId is required");
         }
-        return response;
+        return StringEscapeUtils.escapeHtml4(judgeId);
     }
 
 }
