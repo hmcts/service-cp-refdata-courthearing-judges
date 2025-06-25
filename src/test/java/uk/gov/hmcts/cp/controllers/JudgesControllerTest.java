@@ -14,7 +14,6 @@ import uk.gov.hmcts.cp.repository.JudgesRepository;
 import uk.gov.hmcts.cp.services.JudgesService;
 import java.util.UUID;
 
-import static java.util.UUID.fromString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 

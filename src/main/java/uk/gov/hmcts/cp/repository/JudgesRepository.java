@@ -5,7 +5,6 @@ import uk.gov.hmcts.cp.openapi.model.Judges;
 
 import java.util.UUID;
 
-//@FunctionalInterface
 @Repository
 public interface JudgesRepository {
 

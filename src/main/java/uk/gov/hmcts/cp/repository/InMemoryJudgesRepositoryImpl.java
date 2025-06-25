@@ -9,7 +9,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-//@Profile("test")
 public class InMemoryJudgesRepositoryImpl implements JudgesRepository {
 
     private final Map<UUID, Judges> judgesMap = new ConcurrentHashMap<>();
