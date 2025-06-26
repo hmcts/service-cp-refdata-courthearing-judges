@@ -195,7 +195,7 @@ application {
 }
 
 ext {
-  apiJudgesVersion="0.3.3"
+  apiJudgesVersion="0.3.9"
   log4JVersion = "2.24.3"
   logbackVersion = "1.5.18"
   lombokVersion = "1.18.38"
@@ -226,7 +226,7 @@ dependencies {
   compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
 
-  testImplementation(platform('org.junit:junit-bom:5.13.1'))
+  testImplementation(platform('org.junit:junit-bom:5.13.2'))
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '3.5.3', {
     exclude group: 'junit', module: 'junit'
