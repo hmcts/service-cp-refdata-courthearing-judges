@@ -76,6 +76,7 @@ jobs:
           AZURE_DEVOPS_ARTIFACT_TOKEN: ${{ secrets.AZURE_DEVOPS_ARTIFACT_TOKEN }}
           PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
           PACT_BROKER_URL: ${{ env.PACT_BROKER_BASE_URL }}
+          PACT_BROKER_HOST: ${{ env.PACT_BROKER_HOST }}
         run: |
           echo "Building with ARTEFACT_VERSION=$ARTEFACT_VERSION"
           gradle build -DARTEFACT_VERSION="$ARTEFACT_VERSION"
@@ -89,6 +90,7 @@ jobs:
             -Dpact.provider.branch="$git_branch" \
             -Dpact.broker.token="$PACT_BROKER_TOKEN" \
             -Dpact.broker.url="$PACT_BROKER_URL"
+            -Dpact.broker.host="$PACT_BROKER_HOST"
 
       # https://github.com/pactflow/actions
       - uses: pactflow/actions/create-version-tag@v2
