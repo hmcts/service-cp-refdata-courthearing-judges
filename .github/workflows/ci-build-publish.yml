@@ -83,11 +83,19 @@ jobs:
           gradle build -DARTEFACT_VERSION="$ARTEFACT_VERSION"
 
           git_branch=$(git rev-parse --abbrev-ref HEAD)
+          
+          echo "Current git branch: $git_branch"
+          echo "ARTEFACT_VERSION=$ARTEFACT_VERSION"
+          echo "git_branch=$git_branch"
+          echo "PACT_BROKER_TOKEN=$PACT_BROKER_TOKEN"
+          echo "PACT_BROKER_URL=$PACT_BROKER_URL"
+          echo "PACT_BROKER_HOST=$PACT_BROKER_HOST"
+          echo "PACT_ENV=$PACT_ENV"
 
           # Run provider verification
           gradle pactVerificationTest \
             -Dpact.broker.version="$ARTEFACT_VERSION" \
-            -Dpact.verifier.publishResults=true \
+            -Dpact.verifier.publishResults="true" \
             -Dpact.provider.branch="$git_branch" \
             -Dpact.broker.token="$PACT_BROKER_TOKEN" \
             -Dpact.broker.url="$PACT_BROKER_URL" \

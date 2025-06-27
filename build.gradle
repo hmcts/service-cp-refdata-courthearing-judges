@@ -90,7 +90,7 @@ task integration(type: Test) {
 println "PACT BROKER:"
 println " - pact.broker.url=${System.getProperty('pact.broker.url')}"
 println " - pact.broker.host=${System.getProperty('pact.broker.host')}"
-println " - pact.broker.token=${!System.getProperty('pact.broker.token') || System.getProperty('pact.broker.token').isBlank() ? '❌NULL or EMPTY' : ' ✔ FOUND'}"
+println " - pact.broker.token=${System.getProperty('pact.broker.token') || !System.getProperty('pact.broker.token').isBlank() ? ' ✔ FOUND' : '❌NULL or EMPTY'}"
 println " - pact.broker.version=${System.getProperty('pact.broker.version')}"
 println " - pact.broker.branch=${System.getProperty('pact.broker.branch')}"
 println " - pact.broker.publishResults=${System.getProperty('pact.broker.publishResults')}"
