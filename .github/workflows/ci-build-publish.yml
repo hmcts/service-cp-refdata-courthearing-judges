@@ -50,6 +50,7 @@ jobs:
       PACT_BROKER_BASE_URL: https://hmcts-dts.pactflow.io
       PACT_BROKER_HOST: hmcts-dts.pactflow.io
       PACT_ENV: dev/pactTest
+      PACT_APPLICATION_NAME: "VPJudgesProvider"
     outputs:
       repo_name: ${{ steps.repo_vars.outputs.repo_name }}
       artefact_name: ${{ steps.repo_vars.outputs.artefact_name }}
@@ -89,14 +90,24 @@ jobs:
             -Dpact.broker.token="$PACT_BROKER_TOKEN" \
             -Dpact.broker.url="$PACT_BROKER_URL"
 
-      # https://github.com/pactflow
+      # https://github.com/pactflow/actions
       - uses: pactflow/actions/create-version-tag@v2
         with:
-          tag: ${{ PACT_ENV }}
+          tag: ${{ env.PACT_BROKER_BASE_URL }}
           version: ${{ needs.Artefact-Version.outputs.artefact_version }}
-          application_name: "VPJudgesProvider"
-          broker_url: ${{ PACT_BROKER_BASE_URL }}
+          application_name: ${{ env.PACT_APPLICATION_NAME }}
+          broker_url: ${{ env.PACT_BROKER_BASE_URL }}
           token: ${{ secrets.PACT_BROKER_TOKEN }}
+
+      - uses: pactflow/actions/can-i-deploy@v2
+        with:
+          application_name: ${{ env.PACT_APPLICATION_NAME }}
+          broker_url: ${{ env.PACT_BROKER_BASE_URL }}
+          token: ${{ secrets.PACT_BROKER_TOKEN }}
+          version: ${{ needs.Artefact-Version.outputs.artefact_version }}
+          to_environment: ${{ env.PACT_ENV}}
+          retry_while_unknown: 3 # Optional: number of times to retry while the verification status is unknown
+          retry_interval: 5 # Optional: number of seconds to wait between retries
 
       - name: Publish
         if: ${{ inputs.is_publish }}
