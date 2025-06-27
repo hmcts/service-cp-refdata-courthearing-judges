@@ -47,9 +47,9 @@ jobs:
     needs: [Artefact-Version]
     runs-on: ubuntu-latest
     env:
-      PACT_BROKER_BASE_URL: https://hmcts-dts.pactflow.io
-      PACT_BROKER_HOST: hmcts-dts.pactflow.io
-      PACT_ENV: dev/pactTest
+      PACT_BROKER_BASE_URL: "https://hmcts-dts.pactflow.io"
+      PACT_BROKER_HOST: "hmcts-dts.pactflow.io"
+      PACT_ENV: "dev/pactTest"
       PACT_APPLICATION_NAME: "VPJudgesProvider"
     outputs:
       repo_name: ${{ steps.repo_vars.outputs.repo_name }}
@@ -75,9 +75,9 @@ jobs:
           AZURE_DEVOPS_ARTIFACT_USERNAME: ${{ secrets.AZURE_DEVOPS_ARTIFACT_USERNAME }}
           AZURE_DEVOPS_ARTIFACT_TOKEN: ${{ secrets.AZURE_DEVOPS_ARTIFACT_TOKEN }}
           PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
-          PACT_BROKER_URL: ${{ env.PACT_BROKER_BASE_URL }}
-          PACT_BROKER_HOST: ${{ env.PACT_BROKER_HOST }}
-          PACT_ENV:  ${{ env.PACT_ENV }}
+          PACT_BROKER_URL: ${{ PACT_BROKER_BASE_URL }}
+          PACT_BROKER_HOST: ${{ PACT_BROKER_HOST }}
+          PACT_ENV:  ${{ PACT_ENV }}
         run: |
           echo "Building with ARTEFACT_VERSION=$ARTEFACT_VERSION"
           gradle build -DARTEFACT_VERSION="$ARTEFACT_VERSION"
