@@ -87,17 +87,41 @@ task integration(type: Test) {
   failFast = true
 }
 
+println "PACT BROKER:"
+println " - pact.broker.url=${System.getProperty('pact.broker.url')}"
+println " - pact.broker.host=${System.getProperty('pact.broker.url')}"
+println " - pact.broker.token=${System.getProperty('pact.broker.token')}"
+println " - pact.broker.version=${System.getProperty('pact.broker.version')}"
+println " - pact.broker.branch=${System.getProperty('pact.broker.branch')}"
+println " - pact.broker.publishResults=${System.getProperty('pact.broker.publishResults')}"
+println " - pact.env=${System.getProperty('pact.env')}"
+
 tasks.register('pactVerificationTest', Test) {
   useJUnitPlatform {
     includeTags 'pact'
   }
-  systemProperty 'pact.broker.url', System.getenv('PACT_BROKER_URL')
-  systemProperty 'pact.broker.token', System.getenv('PACT_BROKER_TOKEN')
-  systemProperty 'pact.provider.version', version
-  systemProperty 'pact.provider.branch', System.getenv('GIT_BRANCH')
-  systemProperty 'pact.verifier.publishResults', System.getenv('PACT_VERIFIER_PUBLISH_RESULTS')
-  systemProperty 'pact.broker.host', System.getenv('PACT_BROKER_HOST')
-  systemProperty 'pact.env', System.getenv('PACT_ENV')
+  // this eases local development, but should not be used in CI
+  if (!System.getProperty('pact.broker.url')) {
+    systemProperty 'pact.broker.url', System.getenv('PACT_BROKER_URL')
+  }
+  if (!System.getProperty('pact.broker.host')) {
+    systemProperty 'pact.broker.host', System.getenv('PACT_BROKER_HOST')
+  }
+  if (!System.getProperty('pact.broker.token')) {
+    systemProperty 'pact.broker.token', System.getenv('PACT_BROKER_TOKEN')
+  }
+  if (!System.getProperty('pact.broker.version')) {
+    systemProperty 'pact.provider.version', System.getenv('ARTEFACT_VERSION')
+  }
+  if (!System.getProperty('pact.broker.branch')) {
+    systemProperty 'pact.provider.branch', System.getenv('GIT_BRANCH')
+  }
+  if (!System.getProperty('pact.broker.publishResults')) {
+    systemProperty 'pact.verifier.publishResults', System.getenv('PACT_VERIFIER_PUBLISH_RESULTS')
+  }
+  if (!System.getProperty('pact.env')) {
+    systemProperty 'pact.env', System.getenv('PACT_ENV')
+  }
 }
 
 tasks.named('jacocoTestReport') {
@@ -232,7 +256,6 @@ dependencies {
     exclude group: 'junit', module: 'junit'
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
-
   testImplementation 'au.com.dius.pact.provider:junit5:4.6.17'
   testImplementation 'au.com.dius.pact.provider:spring6:4.6.17'
 }
