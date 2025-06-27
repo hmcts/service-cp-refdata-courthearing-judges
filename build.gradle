@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.testing.Test
+
 plugins {
   id 'application'
   id 'java'
@@ -40,13 +42,6 @@ java {
 }
 
 sourceSets {
-  functionalTest {
-    java {
-      compileClasspath += sourceSets.main.output
-      runtimeClasspath += sourceSets.main.output
-    }
-    resources.srcDir file('src/functionalTest/resources')
-  }
   integrationTest {
     java {
       compileClasspath += sourceSets.main.output
@@ -57,9 +52,6 @@ sourceSets {
 }
 
 configurations {
-  functionalTestImplementation.extendsFrom testImplementation
-  functionalTestRuntimeOnly.extendsFrom runtimeOnly
-
   integrationTestImplementation.extendsFrom testImplementation
   integrationTestRuntimeOnly.extendsFrom runtimeOnly
 }
@@ -75,7 +67,9 @@ tasks.withType(JavaExec).configureEach {
 }
 
 tasks.named('test') {
-  useJUnitPlatform()
+  useJUnitPlatform{
+    excludeTags 'pact'
+  }
   systemProperty 'API_SPEC_VERSION', project.version
   failFast = true
   testLogging {
@@ -85,19 +79,25 @@ tasks.named('test') {
   }
 }
 
-task functional(type: Test) {
-  description = "Runs functional tests"
-  group = "Verification"
-  testClassesDirs = sourceSets.functionalTest.output.classesDirs
-  classpath = sourceSets.functionalTest.runtimeClasspath
-}
-
 task integration(type: Test) {
   description = "Runs integration tests"
   group = "Verification"
   testClassesDirs = sourceSets.integrationTest.output.classesDirs
   classpath = sourceSets.integrationTest.runtimeClasspath
   failFast = true
+}
+
+tasks.register('pactVerificationTest', Test) {
+  useJUnitPlatform {
+    includeTags 'pact'
+  }
+  systemProperty 'pact.broker.url', System.getenv('PACT_BROKER_URL')
+  systemProperty 'pact.broker.token', System.getenv('PACT_BROKER_TOKEN')
+  systemProperty 'pact.provider.version', version
+  systemProperty 'pact.provider.branch', System.getenv('GIT_BRANCH')
+  systemProperty 'pact.verifier.publishResults', System.getenv('PACT_VERIFIER_PUBLISH_RESULTS')
+  systemProperty 'pact.broker.host', System.getenv('PACT_BROKER_HOST')
+  systemProperty 'pact.env', System.getenv('PACT_ENV')
 }
 
 tasks.named('jacocoTestReport') {
@@ -235,25 +235,4 @@ dependencies {
 
   testImplementation 'au.com.dius.pact.provider:junit5:4.6.17'
   testImplementation 'au.com.dius.pact.provider:spring6:4.6.17'
-
-  test{
-    useJUnitPlatform {
-      excludeTags 'pact'
-    }
-  }
-
-  tasks.register('pactVerificationTest', Test) {
-    useJUnitPlatform {
-      includeTags 'pact'
-    }
-    systemProperty 'pact.broker.url', System.getenv('PACT_BROKER_URL')
-    systemProperty 'pact.broker.token', System.getenv('PACT_BROKER_TOKEN')
-    systemProperty 'pact.provider.version', System.getenv('GIT_COMMIT') ?: 'dev'
-    systemProperty 'pact.provider.branch', System.getenv('GIT_BRANCH')
-    systemProperty 'pact.verifier.publishResults', System.getenv('PACT_VERIFIER_PUBLISH_RESULTS')
-    systemProperty 'pact.broker.host', System.getenv('PACT_BROKER_HOST')
-    systemProperty 'pact.env', System.getenv('PACT_ENV')
-  }
-
-
 }
