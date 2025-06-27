@@ -84,7 +84,6 @@ jobs:
 
           git_branch=$(git rev-parse --abbrev-ref HEAD)
           
-          echo "Current git branch: $git_branch"
           echo "ARTEFACT_VERSION=$ARTEFACT_VERSION"
           echo "git_branch=$git_branch"
           echo "PACT_BROKER_TOKEN=$PACT_BROKER_TOKEN"
