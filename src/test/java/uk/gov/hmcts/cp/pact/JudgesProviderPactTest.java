@@ -11,6 +11,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -20,6 +22,7 @@ import uk.gov.hmcts.cp.openapi.model.JudgesJudiciary;
 import uk.gov.hmcts.cp.repository.JudgesRepository;
 
 import java.util.UUID;
+
 import static java.util.UUID.fromString;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -33,6 +36,8 @@ import static java.util.UUID.fromString;
 @Tag("pact")
 public class JudgesProviderPactTest {
 
+    private static final Logger log = LoggerFactory.getLogger(JudgesProviderPactTest.class);
+
     @Autowired
     private JudgesRepository judgesRepository;
 
@@ -41,9 +46,13 @@ public class JudgesProviderPactTest {
 
     @BeforeEach
     void setupTarget(PactVerificationContext context) {
-        System.out.println("Running test on port: " + port);
+        String token = System.getProperty("pact.broker.token");
+        log.atDebug().log("System Property - pact.broker.token is " + (token == null ? "null" : "set"));
+        log.atDebug().log("System Property - pact.broker.host: " + System.getProperty("pact.broker.host"));
+        log.atDebug().log("System Property - pact.broker.url: " + System.getProperty("pact.broker.url"));
+        log.atDebug().log("Running test on port: " + port);
         context.setTarget(new HttpTestTarget("localhost", port));
-        System.out.println("pact.verifier.publishResults: " + System.getProperty("pact.verifier.publishResults"));
+        log.atDebug().log("pact.verifier.publishResults: " + System.getProperty("pact.verifier.publishResults"));
     }
 
     @State("judge exists")
