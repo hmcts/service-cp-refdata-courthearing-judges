@@ -36,6 +36,14 @@ def azureADOArtifactToken = System.getenv("AZURE_DEVOPS_ARTIFACT_TOKEN")
 //println " - AZURE_DEVOPS_ARTIFACT_USERNAME=${!azureADOArtifactActor || azureADOArtifactActor.isBlank() ? '❌NULL or EMPTY' : ' ✔ FOUND'}"
 //println " - AZURE_DEVOPS_ARTIFACT_USERNAME=${!azureADOArtifactToken || azureADOArtifactToken.isBlank() ? '❌NULL or EMPTY' : ' ✔ FOUND'}"
 
+doFirst {
+  println "🔍 Pact JVM Properties:"
+  println " - pact.broker.url = " + System.getProperty("pact.broker.url")
+  println " - pact.broker.token = " + (System.getProperty("pact.broker.token") != null ? "✔ set" : "❌ missing")
+  println " - pact.provider.branch = " + System.getProperty("pact.provider.branch")
+  println " - pact.verifier.publishResults = " + System.getProperty("pact.verifier.publishResults")
+}
+
 java {
   sourceCompatibility = JavaVersion.VERSION_21
   targetCompatibility = JavaVersion.VERSION_21
@@ -117,12 +125,12 @@ tasks.register('pactVerificationTest', Test) {
     println "'pact.broker.version' not set, using environment variable ARTEFACT_VERSION if available"
     systemProperty 'pact.provider.version', System.getenv('ARTEFACT_VERSION')
   }
-  if (!System.getProperty('pact.broker.branch')) {
-    println "'pact.broker.branch' not set, using environment variable GIT_BRANCH if available"
+  if (!System.getProperty('pact.provider.branch')) {
+    println "'pact.provider.branch' not set, using environment variable GIT_BRANCH if available"
     systemProperty 'pact.provider.branch', System.getenv('GIT_BRANCH')
   }
-  if (!System.getProperty('pact.broker.publishResults')) {
-    println "'pact.broker.publishResults' not set, using environment variable PACT_VERIFIER_PUBLISH_RESULTS if available"
+  if (!System.getProperty('pact.verifier.publishResults')) {
+    println "'pact.verifier.publishResults' not set, using environment variable PACT_VERIFIER_PUBLISH_RESULTS if available"
     systemProperty 'pact.verifier.publishResults', System.getenv('PACT_VERIFIER_PUBLISH_RESULTS')
   }
   if (!System.getProperty('pact.env')) {
