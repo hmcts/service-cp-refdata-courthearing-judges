@@ -82,6 +82,24 @@ jobs:
         with:
           gradle-version: current
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+
+      - name: Install Pact CLI
+        run: npm install --save-dev @pact-foundation/pact-cli
+
+      # This step checks PactFlow to determine if any pacts have changed since the last successful verification
+      # for this provider and branch. If changes are detected, subsequent provider verification should be triggered.
+      - name: Check for changed pacts
+        id: changed
+        uses: pactflow/actions/is-change-pact@v1
+        with:
+          to: ${{ github.ref_name }}
+          brokerUrl: ${{ inputs.pact_broker_base_url }}
+          brokerToken: ${{ secrets.PACT_BROKER_TOKEN }}
+          provider: ${{ inputs.pact_application_name }}
+          environment: ${{ inputs.PACT_ENV }}
+
       - name: Gradle Build
         env:
           ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
@@ -122,6 +140,14 @@ jobs:
 #            -Dpact.broker.url="$PACT_BROKER_URL"
 
       # https://github.com/pactflow/actions
+#      - uses: pactflow/actions/publish-pact-files@v1
+#        with:
+#          pactflow_token: ${{ secrets.PACTFLOW_TOKEN }}
+#          pacticipant: my-consumer
+#          version: ${{ github.sha }}
+#          pact_directory: ./pacts
+#          tags: "main, latest"
+
       - uses: pactflow/actions/create-version-tag@v2
         with:
           tag: ${{ inputs.pact_env }}
