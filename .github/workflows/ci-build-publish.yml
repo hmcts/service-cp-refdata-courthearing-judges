@@ -165,7 +165,7 @@ jobs:
           echo "PACT_ENV=$PACT_ENV"
           
           # Run provider verification
-          gradle pactVerificationTest --debug  \
+          gradle pactVerificationTest \
             -Dpact.provider.version="$GIT_COMMIT" \
             -Dpact.verifier.publishResults=true \
             -Dpact.provider.branch="$PACT_PROVIDER_BRANCH" \
