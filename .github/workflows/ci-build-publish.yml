@@ -115,16 +115,15 @@ jobs:
           echo "Building with ARTEFACT_VERSION=$ARTEFACT_VERSION"
           gradle build -DARTEFACT_VERSION="$ARTEFACT_VERSION"
 
-          git_branch=$(git rev-parse --abbrev-ref HEAD)
-          
-          echo "ARTEFACT_VERSION=$ARTEFACT_VERSION"
-          echo "git_branch=$git_branch"
-          echo "PACT_BROKER_TOKEN=$PACT_BROKER_TOKEN"
-          echo "PACT_BROKER_URL=$PACT_BROKER_URL"
-          echo "PACT_BROKER_HOST=$PACT_BROKER_HOST"
-          echo "PACT_ENV=$PACT_ENV"
-
-          # Run provider verification
+#          git_branch=$(git rev-parse --abbrev-ref HEAD)
+#          echo "ARTEFACT_VERSION=$ARTEFACT_VERSION"
+#          echo "git_branch=$git_branch"
+#          echo "PACT_BROKER_TOKEN=$PACT_BROKER_TOKEN"
+#          echo "PACT_BROKER_URL=$PACT_BROKER_URL"
+#          echo "PACT_BROKER_HOST=$PACT_BROKER_HOST"
+#          echo "PACT_ENV=$PACT_ENV"
+#
+#          # Run provider verification
 #          gradle pactVerificationTest --debug \
 #            -Dpact.broker.version="$ARTEFACT_VERSION" \
 #            -Dpact.verifier.publishResults="true" \
@@ -148,6 +147,30 @@ jobs:
           broker_url: ${{ inputs.pact_broker_base_url }}
           token: ${{ secrets.PACT_BROKER_TOKEN }}
           branch: ${{ github.ref_name }}
+
+      - name: Pact Provider Verification
+        env:
+          ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
+          PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
+          PACT_BROKER_URL: ${{ inputs.pact_broker_base_url }}
+          PACT_BROKER_HOST: ${{ inputs.pact_broker_host }}
+          PACT_PROVIDER_BRANCH: ${{ github.ref_name }}
+          PACT_ENV: ${{ inputs.pact_env }}
+        run: |
+          echo "ARTEFACT_VERSION=$ARTEFACT_VERSION"
+          echo "PACT_PROVIDER_BRANCH=$PACT_PROVIDER_BRANCH"
+          echo "PACT_BROKER_TOKEN=$PACT_BROKER_TOKEN"
+          echo "PACT_BROKER_URL=$PACT_BROKER_URL"
+          echo "PACT_BROKER_HOST=$PACT_BROKER_HOST"
+          echo "PACT_ENV=$PACT_ENV"
+          
+          # Run provider verification
+          gradle pactVerificationTest --debug  \
+            -Dpact.provider.version="$GIT_COMMIT" \
+            -Dpact.verifier.publishResults=true \
+            -Dpact.provider.branch="$git_branch" \
+            -Dpact.broker.token="$PACT_BROKER_TOKEN" \
+            -Dpact.broker.url="$PACT_BROKER_URL"
 
       # https://github.com/pactflow/actions
 #      - uses: pactflow/actions/publish-pact-files@v1
