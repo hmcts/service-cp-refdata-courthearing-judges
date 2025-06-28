@@ -88,17 +88,19 @@ jobs:
       - name: Install Pact CLI
         run: npm install --save-dev @pact-foundation/pact-cli
 
-      # This step checks PactFlow to determine if any pacts have changed since the last successful verification
-      # for this provider and branch. If changes are detected, subsequent provider verification should be triggered.
-      - name: Check for changed pacts
-        id: changed
-        uses: pactflow/actions/is-change-pact@v1
-        with:
-          to: ${{ github.ref_name }}
-          brokerUrl: ${{ inputs.pact_broker_base_url }}
-          brokerToken: ${{ secrets.PACT_BROKER_TOKEN }}
-          provider: ${{ inputs.pact_application_name }}
-          environment: ${{ inputs.PACT_ENV }}
+#      # This step checks PactFlow to determine if any pacts have changed since the last successful verification
+#      # for this provider and branch. If changes are detected, subsequent provider verification should be triggered.
+#      - name: Check for changed pacts
+#        id: canideploy
+#        run: |
+#          npx pact-broker can-i-deploy \
+#            --pacticipant your-provider-name \
+#            --version ${{ github.sha }} \
+#            --broker-base-url ${{ inputs.pact_broker_base_url }} \
+#            --broker-token ${{ secrets.PACT_BROKER_TOKEN }} \
+#            --dry-run \
+#          && echo "changed=true" >> $GITHUB_OUTPUT \
+#          || echo "changed=false" >> $GITHUB_OUTPUT
 
       - name: Gradle Build
         env:
@@ -139,6 +141,14 @@ jobs:
 #            -Dpact.broker.token="$PACT_BROKER_TOKEN" \
 #            -Dpact.broker.url="$PACT_BROKER_URL"
 
+      - uses: pactflow/actions/create-or-update-version@v2
+        with:
+          application_name: ${{ inputs.pact_application_name }}
+          version: ${{ needs.Artefact-Version.outputs.artefact_version }}
+          broker_url: ${{ inputs.pact_broker_base_url }}
+          token: ${{ secrets.PACT_BROKER_TOKEN }}
+          branch: ${{ github.ref_name }}
+
       # https://github.com/pactflow/actions
 #      - uses: pactflow/actions/publish-pact-files@v1
 #        with:
@@ -148,23 +158,23 @@ jobs:
 #          pact_directory: ./pacts
 #          tags: "main, latest"
 
-      - uses: pactflow/actions/create-version-tag@v2
-        with:
-          tag: ${{ inputs.pact_env }}
-          version: ${{ needs.Artefact-Version.outputs.artefact_version }}
-          application_name: ${{ inputs.pact_application_name }}
-          broker_url: ${{ inputs.pact_broker_base_url }}
-          token: ${{ secrets.PACT_BROKER_TOKEN }}
-
-      - uses: pactflow/actions/can-i-deploy@v2
-        with:
-          application_name: ${{ inputs.pact_application_name }}
-          broker_url: ${{ inputs.pact_broker_base_url }}
-          token: ${{ secrets.PACT_BROKER_TOKEN }}
-          version: ${{ needs.Artefact-Version.outputs.artefact_version }}
-          to_environment: ${{ inputs.pact_env }}
-          retry_while_unknown: 3 # Optional: number of times to retry while the verification status is unknown
-          retry_interval: 5 # Optional: number of seconds to wait between retries
+#      - uses: pactflow/actions/create-version-tag@v2
+#        with:
+#          tag: ${{ inputs.pact_env }}
+#          version: ${{ needs.Artefact-Version.outputs.artefact_version }}
+#          application_name: ${{ inputs.pact_application_name }}
+#          broker_url: ${{ inputs.pact_broker_base_url }}
+#          token: ${{ secrets.PACT_BROKER_TOKEN }}
+#
+#      - uses: pactflow/actions/can-i-deploy@v2
+#        with:
+#          application_name: ${{ inputs.pact_application_name }}
+#          broker_url: ${{ inputs.pact_broker_base_url }}
+#          token: ${{ secrets.PACT_BROKER_TOKEN }}
+#          version: ${{ needs.Artefact-Version.outputs.artefact_version }}
+#          to_environment: ${{ inputs.pact_env }}
+#          retry_while_unknown: 3 # Optional: number of times to retry while the verification status is unknown
+#          retry_interval: 5 # Optional: number of seconds to wait between retries
 
       - name: Publish
         if: ${{ inputs.is_publish }}
