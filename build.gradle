@@ -36,14 +36,6 @@ def azureADOArtifactToken = System.getenv("AZURE_DEVOPS_ARTIFACT_TOKEN")
 //println " - AZURE_DEVOPS_ARTIFACT_USERNAME=${!azureADOArtifactActor || azureADOArtifactActor.isBlank() ? '❌NULL or EMPTY' : ' ✔ FOUND'}"
 //println " - AZURE_DEVOPS_ARTIFACT_USERNAME=${!azureADOArtifactToken || azureADOArtifactToken.isBlank() ? '❌NULL or EMPTY' : ' ✔ FOUND'}"
 
-doFirst {
-  println "🔍 Pact JVM Properties:"
-  println " - pact.broker.url = " + System.getProperty("pact.broker.url")
-  println " - pact.broker.token = " + (System.getProperty("pact.broker.token") != null ? "✔ set" : "❌ missing")
-  println " - pact.provider.branch = " + System.getProperty("pact.provider.branch")
-  println " - pact.verifier.publishResults = " + System.getProperty("pact.verifier.publishResults")
-}
-
 java {
   sourceCompatibility = JavaVersion.VERSION_21
   targetCompatibility = JavaVersion.VERSION_21
@@ -105,6 +97,13 @@ task integration(type: Test) {
 //println " - pact.env=${System.getProperty('pact.env')}"
 
 tasks.register('pactVerificationTest', Test) {
+  doFirst {
+    println "🔍 Pact JVM Properties:"
+    println " - pact.broker.url = " + System.getProperty("pact.broker.url")
+    println " - pact.broker.token = " + (System.getProperty("pact.broker.token") != null ? "✔ set" : "❌ missing")
+    println " - pact.provider.branch = " + System.getProperty("pact.provider.branch")
+    println " - pact.verifier.publishResults = " + System.getProperty("pact.verifier.publishResults")
+  }
   useJUnitPlatform {
     includeTags 'pact'
   }
