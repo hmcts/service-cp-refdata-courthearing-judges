@@ -40,13 +40,6 @@ java {
 }
 
 sourceSets {
-  functionalTest {
-    java {
-      compileClasspath += sourceSets.main.output
-      runtimeClasspath += sourceSets.main.output
-    }
-    resources.srcDir file('src/functionalTest/resources')
-  }
   integrationTest {
     java {
       compileClasspath += sourceSets.main.output
@@ -57,9 +50,6 @@ sourceSets {
 }
 
 configurations {
-  functionalTestImplementation.extendsFrom testImplementation
-  functionalTestRuntimeOnly.extendsFrom runtimeOnly
-
   integrationTestImplementation.extendsFrom testImplementation
   integrationTestRuntimeOnly.extendsFrom runtimeOnly
 }
@@ -75,7 +65,9 @@ tasks.withType(JavaExec).configureEach {
 }
 
 tasks.named('test') {
-  useJUnitPlatform()
+  useJUnitPlatform{
+    excludeTags 'pact'
+  }
   systemProperty 'API_SPEC_VERSION', project.version
   failFast = true
   testLogging {
@@ -85,19 +77,67 @@ tasks.named('test') {
   }
 }
 
-task functional(type: Test) {
-  description = "Runs functional tests"
-  group = "Verification"
-  testClassesDirs = sourceSets.functionalTest.output.classesDirs
-  classpath = sourceSets.functionalTest.runtimeClasspath
-}
-
 task integration(type: Test) {
   description = "Runs integration tests"
   group = "Verification"
   testClassesDirs = sourceSets.integrationTest.output.classesDirs
   classpath = sourceSets.integrationTest.runtimeClasspath
   failFast = true
+}
+
+tasks.register('pactVerificationTest', Test) {
+  testClassesDirs = sourceSets.test.output.classesDirs
+  classpath = sourceSets.test.runtimeClasspath
+
+  doFirst {
+    println "🔍 Pact Test - Checking JVM Properties:"
+    println " - pact.broker.url = " + System.getProperty("pact.broker.url")
+    println " - pact.broker.host = " + System.getProperty("pact.broker.host")
+    println " - pact.broker.token = " + (System.getProperty("pact.broker.token") != null ? "******" : "❌ missing")
+    println " - pact.broker.version = " + System.getProperty("pact.broker.version")
+    println " - pact.provider.branch = " + System.getProperty("pact.provider.branch")
+    println " - pact.verifier.publishResults = " + System.getProperty("pact.verifier.publishResults")
+    println " - pact.env = " + System.getProperty("pact.env")
+  }
+  useJUnitPlatform {
+    includeTags 'pact'
+  }
+  // the env properties ease local development, but should not be used in CI
+  if (!System.getProperty('pact.broker.url')) {
+    def pact_broker_url = System.getenv('PACT_BROKER_URL')
+    println "'pact.broker.url' not set, using environment variable PACT_BROKER_URL: " + pact_broker_url
+    systemProperty 'pact.broker.url', pact_broker_url
+  }
+  if (!System.getProperty('pact.broker.host')) {
+    def pact_broker_host = System.getenv('PACT_BROKER_HOST')
+    println "'pact.broker.host' not set, using environment variable PACT_BROKER_HOST: " + pact_broker_host
+    systemProperty 'pact.broker.host', pact_broker_host
+  }
+  if (!System.getProperty('pact.broker.token')) {
+    def pact_broker_token = System.getenv('PACT_BROKER_TOKEN')
+    println "'pact.broker.token' not set, using environment variable PACT_BROKER_TOKEN: " + ( pact_broker_token != null ? '******' : '❌ missing' )
+    systemProperty 'pact.broker.token', pact_broker_token
+  }
+  if (!System.getProperty('pact.broker.version')) {
+    def pact_broker_version = System.getenv('GIT_COMMIT') ?: System.getenv('ARTEFACT_VERSION')
+    println "'pact.broker.version' not set, using environment variable GIT_COMMIT/ARTEFACT_VERSION: " + pact_broker_version
+    systemProperty 'pact.provider.version', pact_broker_version
+  }
+  if (!System.getProperty('pact.provider.branch')) {
+    def git_branch = System.getenv('GIT_BRANCH')
+    println "'pact.provider.branch' not set, using environment variable GIT_BRANCH:" + git_branch
+    systemProperty 'pact.provider.branch', git_branch
+  }
+  if (!System.getProperty('pact.verifier.publishResults')) {
+    def pact_verifier_publish_results = System.getenv('PACT_VERIFIER_PUBLISH_RESULTS') ?: 'true'
+    println "'pact.verifier.publishResults' not set, using environment variable PACT_VERIFIER_PUBLISH_RESULTS : " + pact_verifier_publish_results
+    systemProperty 'pact.verifier.publishResults', pact_verifier_publish_results
+  }
+  if (!System.getProperty('pact.env')) {
+    def pact_env = System.getenv('PACT_ENV')
+    println "'pact.env' not set, using environment variable PACT_ENV: " + pact_env
+    systemProperty 'pact.env', pact_env
+  }
 }
 
 tasks.named('jacocoTestReport') {
@@ -221,7 +261,7 @@ dependencies {
 
   implementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.5'
   implementation 'org.hibernate.validator:hibernate-validator:9.0.1.Final'
-  implementation 'org.apache.commons:commons-lang3:3.17.0'
+  implementation 'org.apache.commons:commons-text:1.13.1'
 
   compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
@@ -232,28 +272,6 @@ dependencies {
     exclude group: 'junit', module: 'junit'
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
-
   testImplementation 'au.com.dius.pact.provider:junit5:4.6.17'
   testImplementation 'au.com.dius.pact.provider:spring6:4.6.17'
-
-  test{
-    useJUnitPlatform {
-      excludeTags 'pact'
-    }
-  }
-
-  tasks.register('pactVerificationTest', Test) {
-    useJUnitPlatform {
-      includeTags 'pact'
-    }
-    systemProperty 'pact.broker.url', System.getenv('PACT_BROKER_URL')
-    systemProperty 'pact.broker.token', System.getenv('PACT_BROKER_TOKEN')
-    systemProperty 'pact.provider.version', System.getenv('GIT_COMMIT') ?: 'dev'
-    systemProperty 'pact.provider.branch', System.getenv('GIT_BRANCH')
-    systemProperty 'pact.verifier.publishResults', System.getenv('PACT_VERIFIER_PUBLISH_RESULTS')
-    systemProperty 'pact.broker.host', System.getenv('PACT_BROKER_HOST')
-    systemProperty 'pact.env', System.getenv('PACT_ENV')
-  }
-
-
 }
