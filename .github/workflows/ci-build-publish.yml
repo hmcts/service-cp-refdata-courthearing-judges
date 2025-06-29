@@ -19,9 +19,6 @@ on:
       is_publish:
         required: true
         type: boolean
-      trigger_docker:
-        required: true
-        type: boolean
       trigger_deploy:
         required: true
         type: boolean
@@ -232,7 +229,7 @@ jobs:
 
   Build-Docker:
     needs: [ Build, Artefact-Version ]
-    if: ${{ inputs.trigger_docker }}
+    if: ${{ inputs.trigger_deploy }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
