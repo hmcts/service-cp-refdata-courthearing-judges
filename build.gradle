@@ -92,14 +92,17 @@ tasks.register('pactVerificationTest', Test) {
   doFirst {
     println "🔍 Pact Test - Checking JVM Properties:"
     println " - pact.broker.url = " + System.getProperty("pact.broker.url")
-    println " - pact.broker.token = " + (System.getProperty("pact.broker.token") != null ? "✔ set" : "❌ missing")
+    println " - pact.broker.host = " + System.getProperty("pact.broker.host")
+    println " - pact.broker.token = " + (System.getProperty("pact.broker.token") != null ? "******" : "❌ missing")
+    println " - pact.broker.version = " + System.getProperty("pact.broker.version")
     println " - pact.provider.branch = " + System.getProperty("pact.provider.branch")
     println " - pact.verifier.publishResults = " + System.getProperty("pact.verifier.publishResults")
+    println " - pact.env = " + System.getProperty("pact.env")
   }
   useJUnitPlatform {
     includeTags 'pact'
   }
-  // this eases local development, but should not be used in CI
+  // the env properties ease local development, but should not be used in CI
   if (!System.getProperty('pact.broker.url')) {
     def pact_broker_url = System.getenv('PACT_BROKER_URL')
     println "'pact.broker.url' not set, using environment variable PACT_BROKER_URL: " + pact_broker_url
