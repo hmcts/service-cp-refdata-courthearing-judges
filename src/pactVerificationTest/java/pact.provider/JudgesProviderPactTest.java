@@ -24,7 +24,7 @@ import static java.util.UUID.fromString;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith({SpringExtension.class, PactVerificationInvocationContextProvider.class})
-@Provider("VPJudgesProvider")
+@Provider("CPRefDataJudgesProvider")
 @PactBroker(
         scheme = "https",
         host = "${pact.broker.host}",
