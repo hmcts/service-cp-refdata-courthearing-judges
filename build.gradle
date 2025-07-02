@@ -211,6 +211,11 @@ ext {
   lombokVersion = "1.18.38"
 }
 
+tasks.named('processPactVerificationTestResources') {
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+
 dependencies {
   implementation "uk.gov.hmcts.cp:api-cp-refdata-courthearing-judges:$apiJudgesVersion"
   implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
@@ -232,6 +237,8 @@ dependencies {
   implementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.5'
   implementation 'org.hibernate.validator:hibernate-validator:9.0.1.Final'
   implementation 'org.apache.commons:commons-lang3:3.17.0'
+
+  implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
 
   compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
