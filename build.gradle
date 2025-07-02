@@ -238,7 +238,7 @@ dependencies {
   implementation 'org.hibernate.validator:hibernate-validator:9.0.1.Final'
   implementation 'org.apache.commons:commons-lang3:3.17.0'
 
-  implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+  implementation 'com.fasterxml.jackson.core:jackson-databind:2.19.1'
 
   compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
