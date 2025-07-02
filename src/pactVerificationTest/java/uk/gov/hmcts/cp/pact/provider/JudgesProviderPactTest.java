@@ -1,4 +1,4 @@
-package uk.gov.hmcts.cp.pact;
+package uk.gov.hmcts.cp.pact.provider;
 
 import au.com.dius.pact.provider.junit5.HttpTestTarget;
 import au.com.dius.pact.provider.junit5.PactVerificationContext;
@@ -16,8 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.cp.openapi.model.Judges;
-import uk.gov.hmcts.cp.openapi.model.JudgesJudiciary;
 import uk.gov.hmcts.cp.repository.JudgesRepository;
+import uk.gov.hmcts.cp.pact.helper.JsonFileToObject;
 
 import java.util.UUID;
 import static java.util.UUID.fromString;
@@ -47,17 +47,10 @@ public class JudgesProviderPactTest {
     }
 
     @State("judge exists")
-    public void setUpJudges() {
+    public void setUpJudges() throws Exception {
         judgesRepository.clearAll();
         final UUID judgeId = fromString("a228cbdb-e1d0-4d29-bb44-06b7669b66a3");
-        final JudgesJudiciary judiciary = JudgesJudiciary.builder()
-                .johTitle("His Honour")
-                .johNameSurname("John Smith")
-                .role(JudgesJudiciary.RoleEnum.fromValue("judge"))
-                .johKnownAs("His Honour Judge Smith")
-                .build();
-        final Judges judges = new Judges();
-        judges.setJudiciary(judiciary);
+        Judges judges = JsonFileToObject.readJsonFromResources("judges.json", Judges.class);
         judgesRepository.saveJudges(judgeId, judges);
     }
 
