@@ -28,7 +28,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  Publish-Provider-Pacts:
+  Provider-Tests:
     needs: [ Artefact-Version ]
     runs-on: ubuntu-latest
     env:
