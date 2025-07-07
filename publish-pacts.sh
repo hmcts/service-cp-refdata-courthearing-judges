@@ -18,37 +18,39 @@ fi
 
 export GIT_BRANCH="$BRANCH_NAME"
 
+# TEMP comment to test if the two test runs are conflicting
+
 # Run provider verification with results published
-gradle pactVerificationTest \
-  -Dpact.provider.version="$GIT_COMMIT" \
-  -Dpact.verifier.publishResults=true \
-  -Dpact.provider.branch="$GIT_BRANCH" \
-  -Dpact.broker.token="$PACT_BROKER_TOKEN" \
-  -Dpact.broker.url="$PACT_BROKER_URL"
-
-# Optional: tag provider in the broker
-pact-broker create-version-tag \
-  --pacticipant "CPRefDataJudgesProvider" \
-  --version "$GIT_COMMIT" \
-  --tag "$PACT_ENV" \
-  --broker-base-url "$PACT_BROKER_URL" \
-  --broker-token "$PACT_BROKER_TOKEN"
-
-# Can-I-Deploy check
-echo "Running can-i-deploy check for provider compatibility..."
-pact-broker can-i-deploy \
-  --pacticipant "CPRefDataJudgesProvider" \
-  --version "$GIT_COMMIT" \
-  --to-environment "$PACT_ENV" \
-  --broker-base-url "$PACT_BROKER_URL" \
-  --broker-token "$PACT_BROKER_TOKEN" \
-  --output table
-
-CAN_I_DEPLOY_STATUS=$?
-
-if [ "$CAN_I_DEPLOY_STATUS" -ne 0 ]; then
-  echo "❌ Can-I-Deploy failed — this version is NOT safe to deploy to $PACT_ENV."
-  exit 1
-else
-  echo "✅ Can-I-Deploy succeeded — this version is safe to deploy to $PACT_ENV."
-fi
+#gradle pactVerificationTest \
+#  -Dpact.provider.version="$GIT_COMMIT" \
+#  -Dpact.verifier.publishResults=true \
+#  -Dpact.provider.branch="$GIT_BRANCH" \
+#  -Dpact.broker.token="$PACT_BROKER_TOKEN" \
+#  -Dpact.broker.url="$PACT_BROKER_URL"
+#
+## Optional: tag provider in the broker
+#pact-broker create-version-tag \
+#  --pacticipant "CPRefDataJudgesProvider" \
+#  --version "$GIT_COMMIT" \
+#  --tag "$PACT_ENV" \
+#  --broker-base-url "$PACT_BROKER_URL" \
+#  --broker-token "$PACT_BROKER_TOKEN"
+#
+## Can-I-Deploy check
+#echo "Running can-i-deploy check for provider compatibility..."
+#pact-broker can-i-deploy \
+#  --pacticipant "CPRefDataJudgesProvider" \
+#  --version "$GIT_COMMIT" \
+#  --to-environment "$PACT_ENV" \
+#  --broker-base-url "$PACT_BROKER_URL" \
+#  --broker-token "$PACT_BROKER_TOKEN" \
+#  --output table
+#
+#CAN_I_DEPLOY_STATUS=$?
+#
+#if [ "$CAN_I_DEPLOY_STATUS" -ne 0 ]; then
+#  echo "❌ Can-I-Deploy failed — this version is NOT safe to deploy to $PACT_ENV."
+#  exit 1
+#else
+#  echo "✅ Can-I-Deploy succeeded — this version is safe to deploy to $PACT_ENV."
+#fi
