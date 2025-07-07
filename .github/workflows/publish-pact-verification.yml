@@ -1,10 +1,11 @@
-name: Run pact provider test and publish verification report to pact broker
+name: Pact Provider Test and Publish
+# This workflow verifies the provider pacts and publishing the verification report to the Pact Broker.
 
 on:
-  push:
+  pull_request:
     branches:
       - main
-  pull_request:
+  push:
     branches:
       - main
   workflow_dispatch:
