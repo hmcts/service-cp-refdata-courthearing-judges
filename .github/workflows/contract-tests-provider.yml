@@ -107,7 +107,6 @@ jobs:
           version: ${{ needs.Artefact-Version.outputs.artefact_version }}
           broker_url: ${{ env.PACT_BROKER_URL }}
           token: ${{ env.PACT_BROKER_TOKEN }}
-          to_environment: ${{ env.PACT_ENV }}
           to: ${{ env.PACT_ENV }}
           retry_while_unknown: 3
           retry_interval: 5
