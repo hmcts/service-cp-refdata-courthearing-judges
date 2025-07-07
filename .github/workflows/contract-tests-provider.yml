@@ -84,6 +84,7 @@ jobs:
             -Dpact.broker.url="$PACT_BROKER_URL" \
             -Dpact.env="$PACT_ENV"
 
+      # https://github.com/pactflow/actions
       - uses: pactflow/actions/create-or-update-version@v2
         with:
           application_name: ${{ env.PACT_APPLICATION_NAME }}
@@ -92,15 +93,6 @@ jobs:
           token: ${{ env.PACT_BROKER_TOKEN }}
           branch: ${{ env.GIT_BRANCH }}
 
-      # https://github.com/pactflow/actions
-#      - uses: pactflow/actions/publish-pact-files@v1
-#        with:
-#          pactflow_token: ${{ secrets.PACTFLOW_TOKEN }}
-#          pacticipant: my-consumer
-#          version: ${{ github.sha }}
-#          pact_directory: ./pacts
-#          tags: "main, latest"
-
       - uses: pactflow/actions/can-i-deploy@v2
         with:
           application_name: ${{ env.PACT_APPLICATION_NAME }}
@@ -108,39 +100,5 @@ jobs:
           broker_url: ${{ env.PACT_BROKER_URL }}
           token: ${{ env.PACT_BROKER_TOKEN }}
           to: ${{ env.PACT_ENV }}
-          retry_while_unknown: 3
-          retry_interval: 10
-#
-#            - name: Publish
-#              if: ${{ inputs.is_publish }}
-#              env:
-#                ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
-#                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#                AZURE_DEVOPS_ARTIFACT_USERNAME: ${{ secrets.AZURE_DEVOPS_ARTIFACT_USERNAME }}
-#                AZURE_DEVOPS_ARTIFACT_TOKEN: ${{ secrets.AZURE_DEVOPS_ARTIFACT_TOKEN }}
-#              run: |
-#                echo "Publishing artefact for version: $ARTEFACT_VERSION"
-#
-#                gradle publish \
-#                  -DARTEFACT_VERSION=$ARTEFACT_VERSION \
-#                  -DGITHUB_REPOSITORY=${{ github.repository }} \
-#                  -DGITHUB_ACTOR=${{ github.actor }} \
-#                  -DGITHUB_TOKEN=$GITHUB_TOKEN \
-#                  -DAZURE_DEVOPS_ARTIFACT_USERNAME=$AZURE_DEVOPS_ARTIFACT_USERNAME \
-#                  -DAZURE_DEVOPS_ARTIFACT_TOKEN=$AZURE_DEVOPS_ARTIFACT_TOKEN
-
-
-
-      #      # This step checks PactFlow to determine if any pacts have changed since the last successful verification
-      #      # for this provider and branch. If changes are detected, subsequent provider verification should be triggered.
-      #      - name: Check for changed pacts
-      #        id: canideploy
-      #        run: |
-      #          npx pact-broker can-i-deploy \
-      #            --pacticipant your-provider-name \
-      #            --version ${{ github.sha }} \
-      #            --broker-base-url ${{ inputs.pact_broker_base_url }} \
-      #            --broker-token ${{ secrets.PACT_BROKER_TOKEN }} \
-      #            --dry-run \
-      #          && echo "changed=true" >> $GITHUB_OUTPUT \
-      #          || echo "changed=false" >> $GITHUB_OUTPUT
+          retry_while_unknown: 4
+          retry_interval: 20
