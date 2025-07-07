@@ -109,7 +109,7 @@ jobs:
           token: ${{ env.PACT_BROKER_TOKEN }}
           to: ${{ env.PACT_ENV }}
           retry_while_unknown: 3
-          retry_interval: 5
+          retry_interval: 10
 #
 #            - name: Publish
 #              if: ${{ inputs.is_publish }}
