@@ -1,6 +1,6 @@
 package uk.gov.hmcts.cp.controllers;
 
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -29,13 +29,13 @@ public class JudgesController implements JudgesApi {
         final String sanitizedJudgeId;
         final Judges judges;
 
-       try{
-           sanitizedJudgeId = sanitizeJudgeId(judgeId);
-           judges = judgesService.getJudge(fromString(sanitizedJudgeId));
-       } catch (ResponseStatusException e) {
-           LOG.atError().log(e.getMessage());
-           throw e;
-       }
+        try{
+            sanitizedJudgeId = sanitizeJudgeId(judgeId);
+            judges = judgesService.getJudge(fromString(sanitizedJudgeId));
+        } catch (ResponseStatusException e) {
+            LOG.atError().log(e.getMessage());
+            throw e;
+        }
         LOG.debug("Found Judge response for judgeId: {}", sanitizedJudgeId);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
