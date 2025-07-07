@@ -66,14 +66,6 @@ jobs:
       - name: Install Pact CLI
         run: npm install --save-dev @pact-foundation/pact-cli
 
-      - uses: pactflow/actions/create-or-update-version@v2
-        with:
-          application_name: ${{ env.PACT_APPLICATION_NAME }}
-          version: ${{ needs.Artefact-Version.outputs.artefact_version }}
-          broker_url: ${{ env.PACT_BROKER_URL }}
-          token: ${{ env.PACT_BROKER_TOKEN }}
-          branch: ${{ env.GIT_BRANCH }}
-
       - name: Pact Provider Verification
         env:
           ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
@@ -97,6 +89,14 @@ jobs:
             -Dpact.broker.token="$PACT_BROKER_TOKEN" \
             -Dpact.broker.url="$PACT_BROKER_URL" \
             -Dpact.env="$PACT_ENV"
+
+      - uses: pactflow/actions/create-or-update-version@v2
+        with:
+          application_name: ${{ env.PACT_APPLICATION_NAME }}
+          version: ${{ needs.Artefact-Version.outputs.artefact_version }}
+          broker_url: ${{ env.PACT_BROKER_URL }}
+          token: ${{ env.PACT_BROKER_TOKEN }}
+          branch: ${{ env.GIT_BRANCH }}
 #
 #            # https://github.com/pactflow/actions
 #            #      - uses: pactflow/actions/publish-pact-files@v1
