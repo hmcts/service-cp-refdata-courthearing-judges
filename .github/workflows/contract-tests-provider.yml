@@ -40,7 +40,7 @@ jobs:
       GIT_COMMIT: ${{ github.sha }}
       GIT_BRANCH: ${{ github.ref_name }}
       PACT_ENV: dev/pactTest
-      PACT_APPLICATION_NAME: VPJudgesProvider
+      PACT_APPLICATION_NAME: CPRefDataJudgesProvider
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
