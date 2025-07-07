@@ -102,19 +102,13 @@ jobs:
 #          tags: "main, latest"
 
       - uses: pactflow/actions/can-i-deploy@v2
-        env:
-          ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
-          GIT_BRANCH: ${{ github.ref_name }}
-          PACT_BROKER_URL: ${{ env.PACT_BROKER_URL }}
-          PACT_BROKER_HOST: ${{ env.PACT_BROKER_HOST }}
-          PACT_BROKER_TOKEN: ${{ env.PACT_BROKER_TOKEN }}
-          PACT_ENV: ${{ env.PACT_ENV }}
         with:
           application_name: ${{ env.PACT_APPLICATION_NAME }}
           version: ${{ needs.Artefact-Version.outputs.artefact_version }}
           broker_url: ${{ env.PACT_BROKER_URL }}
           token: ${{ env.PACT_BROKER_TOKEN }}
           to_environment: ${{ env.PACT_ENV }}
+          to: ${{ env.PACT_ENV }}
           retry_while_unknown: 3
           retry_interval: 5
 #
