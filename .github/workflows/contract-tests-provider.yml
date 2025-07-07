@@ -3,17 +3,21 @@ name: Contract Tests Provider
 on:
   pull_request:
     branches:
+      - master
       - main
   push:
     branches:
+      - master
       - main
-  workflow_dispatch:
+
+env:
+  is_release: false
 
 jobs:
   Artefact-Version:
     runs-on: ubuntu-latest
     outputs:
-      artefact_version: ${{ inputs.is_release && steps.artefact.outputs.release_version || steps.artefact.outputs.draft_version }}
+      artefact_version: ${{  env.is_release && steps.artefact.outputs.release_version || steps.artefact.outputs.draft_version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,7 +28,7 @@ jobs:
         id: artefact
         uses: hmcts/artefact-version-action@v1
         with:
-          release: ${{ inputs.is_release }}
+          release: ${{ env.is_release }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -64,13 +68,20 @@ jobs:
 
       - uses: pactflow/actions/create-or-update-version@v2
         with:
-          application_name: ${{ PACT_APPLICATION_NAME }}
+          application_name: ${{ env.PACT_APPLICATION_NAME }}
           version: ${{ needs.Artefact-Version.outputs.artefact_version }}
-          broker_url: ${{ PACT_BROKER_URL }}
-          token: ${{ PACT_BROKER_TOKEN }}
-          branch: ${{ GIT_BRANCH }}
+          broker_url: ${{ env.PACT_BROKER_URL }}
+          token: ${{ env.PACT_BROKER_TOKEN }}
+          branch: ${{ env.GIT_BRANCH }}
 
       - name: Pact Provider Verification
+        env:
+          ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
+          GIT_BRANCH: ${{ github.ref_name }}
+          PACT_BROKER_URL: ${{ env.PACT_BROKER_URL }}
+          PACT_BROKER_HOST: ${{ env.PACT_BROKER_HOST }}
+          PACT_BROKER_TOKEN: ${{ env.PACT_BROKER_TOKEN }}
+          PACT_ENV: ${{ env.PACT_ENV }}
         run: |
           echo "ARTEFACT_VERSION=$ARTEFACT_VERSION"
           echo "GIT_BRANCH=$GIT_BRANCH"
