@@ -1,0 +1,118 @@
+name: Contract Tests Provider
+
+on:
+  pull_request:
+    branches:
+      - master
+      - main
+  push:
+    branches:
+      - master
+      - main
+
+env:
+  is_release: false
+  PACT_BROKER_URL: https://hmcts-dts.pactflow.io
+  PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
+  PACT_ENV: dev/pactTest
+  PACT_APPLICATION_NAME: CPRefDataJudgesProvider
+
+jobs:
+  Artefact-Version:
+    runs-on: ubuntu-latest
+    outputs:
+      artefact_version: ${{  env.is_release && steps.artefact.outputs.release_version || steps.artefact.outputs.draft_version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate Artefact Version
+        id: artefact
+        uses: hmcts/artefact-version-action@v1
+        with:
+          release: ${{ env.is_release }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  Provider-Verification:
+    needs: [ Artefact-Version ]
+    runs-on: ubuntu-latest
+    env:
+      ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: current
+
+      - name: Pact Provider Verification
+        env:
+          GIT_BRANCH: ${{ github.ref_name }}
+          PACT_BROKER_HOST: hmcts-dts.pactflow.io
+        run: |
+          echo "ARTEFACT_VERSION=$ARTEFACT_VERSION"
+          echo "GIT_BRANCH=$GIT_BRANCH"
+          echo "PACT_BROKER_URL=$PACT_BROKER_URL"
+          echo "PACT_ENV=$PACT_ENV"
+          echo "PACT_BROKER_HOST=$PACT_BROKER_HOST"
+          
+          # Run provider verification
+          gradle pactVerificationTest \
+            -Dpact.provider.version="$ARTEFACT_VERSION" \
+            -Dpact.verifier.publishResults=true \
+            -Dpact.provider.branch="$GIT_BRANCH" \
+            -Dpact.broker.token="$PACT_BROKER_TOKEN" \
+            -Dpact.broker.url="$PACT_BROKER_URL" \
+            -Dpact.env="$PACT_ENV"
+
+  Provider-Deploy:
+    needs: [ Provider-Verification ]
+    runs-on: ubuntu-latest
+    env:
+      ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+
+      - name: Install Pact CLI
+        run: npm install -g @pact-foundation/pact-cli
+
+      - name: Tag Version
+        run: |
+          pact-broker create-version-tag \
+            --pacticipant "$PACT_APPLICATION_NAME" \
+            --version "$ARTEFACT_VERSION" \
+            --tag "$PACT_ENV" \
+            --broker-base-url "$PACT_BROKER_URL" \
+            --broker-token "$PACT_BROKER_TOKEN"
+
+      - name: Can I Deploy
+        run: |
+          pact-broker can-i-deploy \
+            --pacticipant "$PACT_APPLICATION_NAME" \
+            --version "$ARTEFACT_VERSION" \
+            --to-environment "$PACT_ENV" \
+            --broker-base-url "$PACT_BROKER_URL" \
+            --broker-token "$PACT_BROKER_TOKEN" \
+            --output table
+          can_i_deploy_status=$?
+          if [ "$can_i_deploy_status" -ne 0 ]; then
+            echo "❌ Can-I-Deploy failed — this version is NOT safe to deploy to $PACT_ENV - (deploy status: $can_i_deploy_status)"
+            exit 1
+          else
+            echo "✅ Can-I-Deploy succeeded — this version is safe to deploy to $PACT_ENV"
+          fi
