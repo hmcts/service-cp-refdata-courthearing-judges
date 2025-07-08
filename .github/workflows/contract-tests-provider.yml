@@ -82,11 +82,15 @@ jobs:
       - name: Install Pact CLI
         run: npm install -g @pact-foundation/pact-cli
 
-      - name: Create Version Tag
-        env:
-          PACT_BROKER_URL: ${{ env.PACT_BROKER_URL }}
-          PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
-          PACT_ENV: ${{ env.PACT_ENV }}
+      - name: Create Version
+        run: |    
+          pact-broker create-version \
+            --pacticipant "$PACT_APPLICATION_NAME" \
+            --version "$ARTEFACT_VERSION" \
+            --broker-base-url "$PACT_BROKER_URL" \
+            --broker-token "$PACT_BROKER_TOKEN"
+
+      - name: Tag Version
         run: |
           pact-broker create-version-tag \
             --pacticipant "$PACT_APPLICATION_NAME" \
