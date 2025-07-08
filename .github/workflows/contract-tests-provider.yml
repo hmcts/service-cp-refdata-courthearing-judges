@@ -64,6 +64,7 @@ jobs:
           ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
           GIT_BRANCH: ${{ github.ref_name }}
           PACT_BROKER_URL: ${{ env.PACT_BROKER_URL }}
+          PACT_BROKER_HOST: hmcts-dts.pactflow.io
           PACT_BROKER_TOKEN: ${{ env.PACT_BROKER_TOKEN }}
           PACT_ENV: ${{ env.PACT_ENV }}
         run: |
@@ -71,10 +72,8 @@ jobs:
           echo "GIT_BRANCH=$GIT_BRANCH"
           echo "PACT_BROKER_URL=$PACT_BROKER_URL"
           echo "PACT_ENV=$PACT_ENV"
-          
-          echo "PACT_BROKER_HOST=${PACT_BROKER_URL#*://}" >> "$GITHUB_ENV"
           echo "PACT_BROKER_HOST=$PACT_BROKER_HOST"
-
+          
           # Run provider verification
           gradle pactVerificationTest \
             -Dpact.provider.version="$ARTEFACT_VERSION" \
