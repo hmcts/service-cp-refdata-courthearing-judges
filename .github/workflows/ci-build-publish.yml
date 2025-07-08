@@ -28,14 +28,6 @@ on:
       pact_application_name:
         required: true
         type: string
-      pact_broker_base_url:
-        required: false
-        type: string
-        default: https://hmcts-dts.pactflow.io
-      pact_env:
-        required: false
-        type: string
-        default: dev/pactTest
 
 jobs:
   Artefact-Version:
@@ -62,6 +54,10 @@ jobs:
     outputs:
       repo_name: ${{ steps.repo_vars.outputs.repo_name }}
       artefact_name: ${{ steps.repo_vars.outputs.artefact_name }}
+    env:
+      PACT_BROKER_BASE_URL: "https://hmcts-dts.pactflow.io"
+      PACT_ENV: "dev/pactTest"
+
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -86,11 +82,12 @@ jobs:
 
       - name: Pact Provider Verification
         env:
+          ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
           GIT_BRANCH: ${{ github.ref_name }}
-          PACT_BROKER_URL: ${{ inputs.pact_broker_base_url }}
+          PACT_BROKER_URL: ${{ env.PACT_BROKER_BASE_URL }}
           PACT_BROKER_HOST: hmcts-dts.pactflow.io
           PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
-          PACT_ENV: dev/pactTest
+          PACT_ENV: ${{ env.PACT_ENV }}
           PACT_APPLICATION_NAME: ${{ inputs.pact_application_name }}
         run: |
           gradle pactVerificationTest \
