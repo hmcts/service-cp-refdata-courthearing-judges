@@ -12,7 +12,6 @@ on:
 
 env:
   is_release: false
-  ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
   PACT_BROKER_URL: https://hmcts-dts.pactflow.io
   PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
   PACT_ENV: dev/pactTest
@@ -40,6 +39,8 @@ jobs:
   Provider-Verification:
     needs: [ Artefact-Version ]
     runs-on: ubuntu-latest
+    env:
+      ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -78,6 +79,8 @@ jobs:
   Provider-Deploy:
     needs: [ Provider-Verification ]
     runs-on: ubuntu-latest
+    env:
+      ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
