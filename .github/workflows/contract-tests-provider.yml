@@ -32,34 +32,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  Provider-Tests-node:
-    needs: [ Artefact-Version ]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
-
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-
-      - name: Set up Pact Environment
-        run: npm run pact:setup:env
-
-#      - name: Run Consumer Tests
-#        run: npm run pact:consumer:test
-#
-#      - name: Publish Pacts
-#        run: npm run pact:publish
-
-      - name: Verify Pacts
-        run: npm run pact:provider:verify
-
-      - name: Can I Deploy?
-        run: npm run pact:can-i-deploy
-
-
   Provider-Tests:
     needs: [ Artefact-Version ]
     runs-on: ubuntu-latest
