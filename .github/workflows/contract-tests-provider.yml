@@ -15,7 +15,7 @@ on:
       pact_broker_base_url:
         required: false
         type: string
-        default: https://hmcts-dts.pactflow.io
+        default: "https://hmcts-dts.pactflow.io"
       pact_env:
         required: false
         type: string
