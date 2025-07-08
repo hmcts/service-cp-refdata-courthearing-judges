@@ -39,9 +39,6 @@ jobs:
       ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
       PACT_BROKER_URL: https://hmcts-dts.pactflow.io
       PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
-      PACT_VERIFIER_PUBLISH_RESULTS: true
-      GIT_COMMIT: ${{ github.sha }}
-      GIT_BRANCH: ${{ github.ref_name }}
       PACT_ENV: dev/pactTest
       PACT_APPLICATION_NAME: CPRefDataJudgesProvider
     steps:
@@ -61,12 +58,8 @@ jobs:
 
       - name: Pact Provider Verification
         env:
-          ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
           GIT_BRANCH: ${{ github.ref_name }}
-          PACT_BROKER_URL: ${{ env.PACT_BROKER_URL }}
           PACT_BROKER_HOST: hmcts-dts.pactflow.io
-          PACT_BROKER_TOKEN: ${{ env.PACT_BROKER_TOKEN }}
-          PACT_ENV: ${{ env.PACT_ENV }}
         run: |
           echo "ARTEFACT_VERSION=$ARTEFACT_VERSION"
           echo "GIT_BRANCH=$GIT_BRANCH"
@@ -83,49 +76,34 @@ jobs:
             -Dpact.broker.url="$PACT_BROKER_URL" \
             -Dpact.env="$PACT_ENV"
 
-      # https://github.com/pactflow/actions
-      - uses: pactflow/actions/create-or-update-version@v2
-        with:
-          application_name: ${{ env.PACT_APPLICATION_NAME }}
-          version: ${{ needs.Artefact-Version.outputs.artefact_version }}
-          broker_url: ${{ env.PACT_BROKER_URL }}
-          token: ${{ env.PACT_BROKER_TOKEN }}
-          branch: ${{ env.GIT_BRANCH }}
-
       - name: Set up Node.js
         uses: actions/setup-node@v4
 
       - name: Install Pact CLI
         run: npm install -g @pact-foundation/pact-cli
 
+      - name: Create Version Tag
+        run: |
+          pact-broker create-version-tag \
+            --pacticipant "$PACT_APPLICATION_NAME" \
+            --version "$ARTEFACT_VERSION" \
+            --tag "$PACT_ENV" \
+            --broker-base-url "$PACT_BROKER_URL" \
+            --broker-token "$PACT_BROKER_TOKEN"
+
       - name: Can I Deploy
-        env:
-          PACT_BROKER_URL: ${{ env.PACT_BROKER_URL }}
-          GIT_COMMIT: ${{ github.sha }}
-          PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
-          PACT_ENV: ${{ env.PACT_ENV }}
         run: |
           pact-broker can-i-deploy \
-            --pacticipant "CPRefDataJudgesProvider" \
-            --version "$GIT_COMMIT" \
+            --pacticipant "$PACT_APPLICATION_NAME" \
+            --version "$ARTEFACT_VERSION" \
             --to-environment "$PACT_ENV" \
             --broker-base-url "$PACT_BROKER_URL" \
             --broker-token "$PACT_BROKER_TOKEN" \
             --output table
           can_i_deploy_status=$?
           if [ "$can_i_deploy_status" -ne 0 ]; then
-            echo "❌ Can-I-Deploy failed — this version is NOT safe to deploy to $PACT_ENV - (deploy statue: $can_i_deploy_status)"
+            echo "❌ Can-I-Deploy failed — this version is NOT safe to deploy to $PACT_ENV - (deploy status: $can_i_deploy_status)"
             exit 1
           else
-            echo "✅ Can-I-Deploy succeeded — this version is safe to deploy to $PACT_ENV."
+            echo "✅ Can-I-Deploy succeeded — this version is safe to deploy to $PACT_ENV"
           fi
-
-#      - uses: pactflow/actions/can-i-deploy@v2
-#        with:
-#          application_name: ${{ env.PACT_APPLICATION_NAME }}
-#          version: ${{ needs.Artefact-Version.outputs.artefact_version }}
-#          broker_url: ${{ env.PACT_BROKER_URL }}
-#          token: ${{ env.PACT_BROKER_TOKEN }}
-#          to: ${{ env.PACT_ENV }}
-#          retry_while_unknown: 4
-#          retry_interval: 20
