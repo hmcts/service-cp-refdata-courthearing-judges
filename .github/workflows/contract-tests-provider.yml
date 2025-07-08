@@ -1,86 +1,35 @@
-name: Contract Tests Provider
+name: Contract Tests
 
 on:
-  pull_request:
-    branches:
-      - master
-      - main
-  push:
-    branches:
-      - master
-      - main
-
-env:
-  is_release: false
-  PACT_BROKER_URL: https://hmcts-dts.pactflow.io
-  PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
-  PACT_ENV: dev/pactTest
-  PACT_APPLICATION_NAME: CPRefDataJudgesProvider
+  workflow_call:
+    secrets:
+      PACT_BROKER_TOKEN:
+        required: true
+    inputs:
+      artefact_version:
+        required: true
+        type: string
+      pact_application_name:
+        required: true
+        type: string
+      pact_broker_base_url:
+        required: false
+        type: string
+        default: https://hmcts-dts.pactflow.io
+      pact_env:
+        required: false
+        type: string
+        default: dev/pactTest
 
 jobs:
-  Artefact-Version:
-    runs-on: ubuntu-latest
-    outputs:
-      artefact_version: ${{  env.is_release && steps.artefact.outputs.release_version || steps.artefact.outputs.draft_version }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Generate Artefact Version
-        id: artefact
-        uses: hmcts/artefact-version-action@v1
-        with:
-          release: ${{ env.is_release }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  Provider-Verification:
-    needs: [ Artefact-Version ]
-    runs-on: ubuntu-latest
-    env:
-      ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
-
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: current
-
-      - name: Pact Provider Verification
-        env:
-          GIT_BRANCH: ${{ github.ref_name }}
-          PACT_BROKER_HOST: hmcts-dts.pactflow.io
-        run: |
-          echo "ARTEFACT_VERSION=$ARTEFACT_VERSION"
-          echo "GIT_BRANCH=$GIT_BRANCH"
-          echo "PACT_BROKER_URL=$PACT_BROKER_URL"
-          echo "PACT_ENV=$PACT_ENV"
-          echo "PACT_BROKER_HOST=$PACT_BROKER_HOST"
-          
-          # Run provider verification
-          gradle pactVerificationTest \
-            -Dpact.provider.version="$ARTEFACT_VERSION" \
-            -Dpact.verifier.publishResults=true \
-            -Dpact.provider.branch="$GIT_BRANCH" \
-            -Dpact.broker.token="$PACT_BROKER_TOKEN" \
-            -Dpact.broker.url="$PACT_BROKER_URL" \
-            -Dpact.env="$PACT_ENV"
-
   Provider-Deploy:
-    needs: [ Provider-Verification ]
     runs-on: ubuntu-latest
     env:
-      ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
+      ARTEFACT_VERSION: ${{ inputs.artefact_version }}
+      PACT_BROKER_URL: ${{ inputs.pact_broker_base_url }}
+      PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
+      PACT_APPLICATION_NAME: ${{ inputs.pact_application_name }}
+      PACT_ENV: ${{ inputs.pact_env }}
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4

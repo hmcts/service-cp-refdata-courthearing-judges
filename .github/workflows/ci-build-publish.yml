@@ -9,6 +9,8 @@ on:
         required: true
       HMCTS_ADO_PAT:
         required: true
+      PACT_BROKER_TOKEN:
+        required: true
     inputs:
       is_release:
         required: false
@@ -23,6 +25,17 @@ on:
       trigger_deploy:
         required: true
         type: boolean
+      pact_application_name:
+        required: true
+        type: string
+      pact_broker_base_url:
+        required: false
+        type: string
+        default: https://hmcts-dts.pactflow.io
+      pact_env:
+        required: false
+        type: string
+        default: dev/pactTest
 
 jobs:
   Artefact-Version:
@@ -73,27 +86,128 @@ jobs:
         run: |
           echo "Building with ARTEFACT_VERSION=$ARTEFACT_VERSION"
 
-          gradle build -DARTEFACT_VERSION=$ARTEFACT_VERSION 
+          gradle build -DARTEFACT_VERSION=$ARTEFACT_VERSION
 
+      - name: Contract Test Provider
+        env:
+          GIT_BRANCH: ${{ github.ref_name }}
+          PACT_BROKER_URL: ${{ inputs.pact_broker_base_url }}
+          PACT_BROKER_HOST: hmcts-dts.pactflow.io
+          PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
+          PACT_ENV: dev/pactTest
+          PACT_APPLICATION_NAME: ${{ inputs.pact_application_name }}
+        run: |
+          gradle pactVerificationTest \
+            -Dpact.provider.version="$ARTEFACT_VERSION" \
+            -Dpact.verifier.publishResults=true \
+            -Dpact.provider.branch="$GIT_BRANCH" \
+            -Dpact.broker.token="$PACT_BROKER_TOKEN" \
+            -Dpact.broker.url="$PACT_BROKER_URL" \
+            -Dpact.env="$PACT_ENV"
+
+      - name: Contract Tests Deploy
+        uses: ./.github/workflows/contract-tests-provider.yml
+        secrets:
+          PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
+        with:
+          artefact_version: ${{ needs.Artefact-Version.outputs.artefact_version }}
+          pact_application_name: ${{ inputs.pact_application_name }}
+          pact_broker_base_url: ${{ inputs.pact_broker_base_url }}
+
+      - name: Gradle Publish
+        if: ${{ inputs.is_publish }}
+        env:
+          ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AZURE_DEVOPS_ARTIFACT_USERNAME: ${{ secrets.AZURE_DEVOPS_ARTIFACT_USERNAME }}
+          AZURE_DEVOPS_ARTIFACT_TOKEN: ${{ secrets.AZURE_DEVOPS_ARTIFACT_TOKEN }}
+        run: |
           if [ -z "AZURE_DEVOPS_ARTIFACT_USERNAME" ]; then
             echo "::warning::AZURE_DEVOPS_ARTIFACT_USERNAME is null or not set"
           fi
-          
+
           if [ -z "$AZURE_DEVOPS_ARTIFACT_TOKEN" ]; then
             echo "::warning::AZURE_DEVOPS_ARTIFACT_TOKEN is null or not set"
           fi
+
+          echo "Publishing artefact for version: $ARTEFACT_VERSION"
           
-          if [ "${{ inputs.is_publish }}" == "true" ]; then
-            echo "Publishing artefact for version: $ARTEFACT_VERSION"
-          
-            gradle publish \
-              -DARTEFACT_VERSION=$ARTEFACT_VERSION \
-              -DGITHUB_REPOSITORY=${{ github.repository }} \
-              -DGITHUB_ACTOR=${{ github.actor }} \
-              -DGITHUB_TOKEN=$GITHUB_TOKEN \
-              -DAZURE_DEVOPS_ARTIFACT_USERNAME=$AZURE_DEVOPS_ARTIFACT_USERNAME \
-              -DAZURE_DEVOPS_ARTIFACT_TOKEN=$AZURE_DEVOPS_ARTIFACT_TOKEN
+          gradle publish \
+            -DARTEFACT_VERSION=$ARTEFACT_VERSION \
+            -DGITHUB_REPOSITORY=${{ github.repository }} \
+            -DGITHUB_ACTOR=${{ github.actor }} \
+            -DGITHUB_TOKEN=$GITHUB_TOKEN \
+            -DAZURE_DEVOPS_ARTIFACT_USERNAME=$AZURE_DEVOPS_ARTIFACT_USERNAME \
+            -DAZURE_DEVOPS_ARTIFACT_TOKEN=$AZURE_DEVOPS_ARTIFACT_TOKEN
+
+      - name: Extract repo name
+        id: repo_vars
+        run: |
+          repo_name=${GITHUB_REPOSITORY##*/}
+          echo "repo_name=${repo_name}" >> $GITHUB_OUTPUT
+          echo "artefact_name=${repo_name}-${{ needs.Artefact-Version.outputs.artefact_version }}" >> $GITHUB_OUTPUT
+
+      - name: Upload JAR Artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-jar
+          path: build/libs/${{ steps.repo_vars.outputs.artefact_name }}.jar
+
+  Contract-Tests-Deploy:
+    needs: [ Artefact-Version, Build ]
+    uses: ./.github/workflows/contract-tests-provider.yml
+    secrets:
+      PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
+    with:
+      artefact_version: ${{ needs.Artefact-Version.outputs.artefact_version }}
+      pact_application_name: CPRefDataJudgesProvider
+
+  Publish:
+    needs: [ Artefact-Version, Contract-Tests-Deploy ]
+    runs-on: ubuntu-latest
+    if: ${{ inputs.is_publish }}
+    outputs:
+      repo_name: ${{ steps.repo_vars.outputs.repo_name }}
+      artefact_name: ${{ steps.repo_vars.outputs.artefact_name }}
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: current
+
+      - name: Gradle Publish
+        env:
+          ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AZURE_DEVOPS_ARTIFACT_USERNAME: ${{ secrets.AZURE_DEVOPS_ARTIFACT_USERNAME }}
+          AZURE_DEVOPS_ARTIFACT_TOKEN: ${{ secrets.AZURE_DEVOPS_ARTIFACT_TOKEN }}
+        run: |
+          if [ -z "AZURE_DEVOPS_ARTIFACT_USERNAME" ]; then
+            echo "::warning::AZURE_DEVOPS_ARTIFACT_USERNAME is null or not set"
           fi
+
+          if [ -z "$AZURE_DEVOPS_ARTIFACT_TOKEN" ]; then
+            echo "::warning::AZURE_DEVOPS_ARTIFACT_TOKEN is null or not set"
+          fi
+
+          echo "Publishing artefact for version: $ARTEFACT_VERSION"
+
+          gradle publish \
+            -DARTEFACT_VERSION=$ARTEFACT_VERSION \
+            -DGITHUB_REPOSITORY=${{ github.repository }} \
+            -DGITHUB_ACTOR=${{ github.actor }} \
+            -DGITHUB_TOKEN=$GITHUB_TOKEN \
+            -DAZURE_DEVOPS_ARTIFACT_USERNAME=$AZURE_DEVOPS_ARTIFACT_USERNAME \
+            -DAZURE_DEVOPS_ARTIFACT_TOKEN=$AZURE_DEVOPS_ARTIFACT_TOKEN
 
       - name: Extract repo name
         id: repo_vars
