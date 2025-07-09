@@ -111,7 +111,6 @@ tasks.register('pactVerificationTest', Test) {
   systemProperty 'pact.provider.version', System.getenv('GIT_COMMIT') ?: 'dev'
   systemProperty 'pact.provider.branch', System.getenv('GIT_BRANCH')
   systemProperty 'pact.verifier.publishResults', System.getenv('PACT_VERIFIER_PUBLISH_RESULTS')
-  systemProperty 'pact.broker.host', System.getenv('PACT_BROKER_HOST')
   systemProperty 'pact.env', System.getenv('PACT_ENV')
   reports {
     junitXml.required.set(true)

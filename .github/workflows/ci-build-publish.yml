@@ -85,7 +85,6 @@ jobs:
           ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
           GIT_BRANCH: ${{ github.ref_name }}
           PACT_BROKER_URL: ${{ env.PACT_BROKER_BASE_URL }}
-          PACT_BROKER_HOST: hmcts-dts.pactflow.io
           PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
           PACT_ENV: ${{ env.PACT_ENV }}
           PACT_APPLICATION_NAME: ${{ inputs.pact_application_name }}
