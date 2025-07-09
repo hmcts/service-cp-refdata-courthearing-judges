@@ -23,3 +23,4 @@ jobs:
       trigger_docker: ${{ github.event_name == 'push' }}
       trigger_deploy: ${{ github.event_name == 'push' }}
       pact_application_name: CPRefDataJudgesProvider
+      pact_env: dev/pactTest
