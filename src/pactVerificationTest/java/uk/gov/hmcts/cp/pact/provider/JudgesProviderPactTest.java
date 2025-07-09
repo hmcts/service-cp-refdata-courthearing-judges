@@ -37,6 +37,8 @@ public class JudgesProviderPactTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(JudgesProviderPactTest.class);
 
+    private static final UUID STUBBED_JUDGE_ID = fromString("a228cbdb-e1d0-4d29-bb44-06b7669b66a3");
+
     @Autowired
     private JudgesRepository judgesRepository;
 
@@ -53,9 +55,9 @@ public class JudgesProviderPactTest {
     @State("judge exists")
     public void setUpJudges() throws Exception {
         judgesRepository.clearAll();
-        final UUID judgeId = fromString("a228cbdb-e1d0-4d29-bb44-06b7669b66a3");
+        LOG.atDebug().log("Setting up judges for judgeId: {}", STUBBED_JUDGE_ID);
         Judges judges = JsonFileToObject.readJsonFromResources("judges.json", Judges.class);
-        judgesRepository.saveJudges(judgeId, judges);
+        judgesRepository.saveJudges(STUBBED_JUDGE_ID, judges);
     }
 
     @TestTemplate
