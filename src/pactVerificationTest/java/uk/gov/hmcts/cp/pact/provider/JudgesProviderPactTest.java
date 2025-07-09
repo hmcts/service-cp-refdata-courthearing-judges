@@ -26,8 +26,7 @@ import static java.util.UUID.fromString;
 @ExtendWith({SpringExtension.class, PactVerificationInvocationContextProvider.class})
 @Provider("CPRefDataJudgesProvider")
 @PactBroker(
-        scheme = "https",
-        host = "${pact.broker.host}",
+        url = "${pact.broker.url}",
         authentication = @PactBrokerAuth(token = "${pact.broker.token}")
 )
 @Tag("pact")

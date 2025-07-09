@@ -80,7 +80,7 @@ jobs:
           echo "Building with ARTEFACT_VERSION=$ARTEFACT_VERSION"
           gradle build -DARTEFACT_VERSION=$ARTEFACT_VERSION
 
-      - name: Pact Provider Verification
+      - name: Pact Provider Verification and Publish Results
         env:
           ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
           GIT_BRANCH: ${{ github.ref_name }}
