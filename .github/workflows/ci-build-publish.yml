@@ -90,7 +90,7 @@ jobs:
 #          pact_application_name: ${{ inputs.pact_application_name }}
 
   Provider-Deploy:
-    needs: [ Build ]
+    needs: [ Artefact-Version, Build ]
     runs-on: ubuntu-latest
     env:
       ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
