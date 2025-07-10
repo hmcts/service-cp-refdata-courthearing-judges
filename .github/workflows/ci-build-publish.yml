@@ -131,23 +131,32 @@ jobs:
       - name: Install Pact CLI
         run: npm install -g @pact-foundation/pact-cli
 
-      - name: Publish Tag (if version exists)
+      - name: Record Deployment
         run: |
-          if pact-broker describe-version \
+          pact-broker record-deployment \
             --pacticipant "$PACT_APPLICATION_NAME" \
             --version "$ARTEFACT_VERSION" \
+            --environment "$PACT_ENV" \
             --broker-base-url "$PACT_BROKER_URL" \
-            --broker-token "$PACT_BROKER_TOKEN"; then
+            --broker-token "$PACT_BROKER_TOKEN"
 
-            pact-broker create-version-tag \
-              --pacticipant "$PACT_APPLICATION_NAME" \
-              --version "$ARTEFACT_VERSION" \
-              --tag "$PACT_ENV" \
-              --broker-base-url "$PACT_BROKER_URL" \
-              --broker-token "$PACT_BROKER_TOKEN"
-          else
-            echo "::warning::Not tagging. Version $ARTEFACT_VERSION of $PACT_APPLICATION_NAME does not exist in PactFlow."
-          fi
+#      - name: Publish Tag (if version exists)
+#        run: |
+#          if pact-broker describe-version \
+#            --pacticipant "$PACT_APPLICATION_NAME" \
+#            --version "$ARTEFACT_VERSION" \
+#            --broker-base-url "$PACT_BROKER_URL" \
+#            --broker-token "$PACT_BROKER_TOKEN"; then
+#
+#            pact-broker create-version-tag \
+#              --pacticipant "$PACT_APPLICATION_NAME" \
+#              --version "$ARTEFACT_VERSION" \
+#              --tag "$PACT_ENV" \
+#              --broker-base-url "$PACT_BROKER_URL" \
+#              --broker-token "$PACT_BROKER_TOKEN"
+#          else
+#            echo "::warning::Not tagging. Version $ARTEFACT_VERSION of $PACT_APPLICATION_NAME does not exist in PactFlow."
+#          fi
 
 #      - name: Tag Version
 #        run: |
