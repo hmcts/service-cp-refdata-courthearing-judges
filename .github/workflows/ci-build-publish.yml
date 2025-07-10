@@ -136,7 +136,6 @@ jobs:
         run: |
           pact-broker create-version-tag \
             --pacticipant "$PACT_APPLICATION_NAME" \
-            --version "$GIT_SHA" \
             --tag "$PACT_ENV" \
             --broker-base-url "$PACT_BROKER_URL" \
             --broker-token "$PACT_BROKER_TOKEN"
