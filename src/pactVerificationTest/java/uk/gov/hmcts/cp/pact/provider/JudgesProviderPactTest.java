@@ -17,12 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.gov.hmcts.cp.controllers.JudgesController;
 import uk.gov.hmcts.cp.openapi.model.Judges;
-import uk.gov.hmcts.cp.repository.JudgesRepository;
 import uk.gov.hmcts.cp.pact.helper.JsonFileToObject;
+import uk.gov.hmcts.cp.repository.JudgesRepository;
 
 import java.util.UUID;
+
 import static java.util.UUID.fromString;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
