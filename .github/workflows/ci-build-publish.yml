@@ -108,6 +108,7 @@ jobs:
           gradle-version: current
 
       # If the results are not published, the Pact Broker will not be able to find the version
+      # NOTE: if the version is not found and verification step is successful, check that 'pact.verifier.publishResults' is set to true in the gradle task
       - name: Pact Provider Verification and Publish Results
         env:
           PACT_PROVIDER_BRANCH: ${{ github.ref_name }}
@@ -128,44 +129,45 @@ jobs:
             -Dpact.broker.url="$PACT_BROKER_URL" \
             -Dpact.env="$PACT_ENV"
 
-#      - uses: hmcts/pact-can-i-deploy@main
-#        with:
-#          pact_broker_token: ${{ secrets.PACT_BROKER_TOKEN }}
-#          artefact_version: ${{ needs.Artefact-Version.outputs.artefact_version }}
-#          pacticipant: ${{ inputs.pacticipant }}
+      - uses: hmcts/pact-can-i-deploy@main
+        with:
+          pact_broker_token: ${{ secrets.PACT_BROKER_TOKEN }}
+          pacticipant: ${{ inputs.pacticipant }}
+          pacticipant_version: ${{ env.PACT_PROVIDER_VERSION }}
+          pact_env: ${{ env.PACT_ENV }}
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-
-      - name: Install Pact CLI
-        run: npm install -g @pact-foundation/pact-cli
-
-      # NOTE: if the version is not found and verification step is successful, check that 'pact.verifier.publishResults' is set to true in the gradle task
-      - name: Tag Version
-        run: |
-          pact-broker create-version-tag \
-            --pacticipant "$PACTICIPANT" \
-            --version "$PACT_PROVIDER_VERSION" \
-            --tag "$PACT_ENV" \
-            --broker-base-url "$PACT_BROKER_URL" \
-            --broker-token "$PACT_BROKER_TOKEN"
-
-      - name: Can I Deploy
-        run: |
-          pact-broker can-i-deploy \
-            --pacticipant "$PACTICIPANT" \
-            --version "$PACT_PROVIDER_VERSION" \
-            --to-environment "$PACT_ENV" \
-            --broker-base-url "$PACT_BROKER_URL" \
-            --broker-token "$PACT_BROKER_TOKEN" \
-            --output table
-          can_i_deploy_status=$?
-          if [ "$can_i_deploy_status" -ne 0 ]; then
-            echo "❌ Can-I-Deploy failed — this version is NOT safe to deploy to $PACT_ENV - (deploy status: $can_i_deploy_status)"
-            exit 1
-          else
-            echo "✅ Can-I-Deploy succeeded — this version is safe to deploy to $PACT_ENV"
-          fi
+#      - name: Set up Node.js
+#        uses: actions/setup-node@v4
+#
+#      - name: Install Pact CLI
+#        run: npm install -g @pact-foundation/pact-cli
+#
+#
+#      - name: Tag Version
+#        run: |
+#          pact-broker create-version-tag \
+#            --pacticipant "$PACTICIPANT" \
+#            --version "$PACT_PROVIDER_VERSION" \
+#            --tag "$PACT_ENV" \
+#            --broker-base-url "$PACT_BROKER_URL" \
+#            --broker-token "$PACT_BROKER_TOKEN"
+#
+#      - name: Can I Deploy
+#        run: |
+#          pact-broker can-i-deploy \
+#            --pacticipant "$PACTICIPANT" \
+#            --version "$PACT_PROVIDER_VERSION" \
+#            --to-environment "$PACT_ENV" \
+#            --broker-base-url "$PACT_BROKER_URL" \
+#            --broker-token "$PACT_BROKER_TOKEN" \
+#            --output table
+#          can_i_deploy_status=$?
+#          if [ "$can_i_deploy_status" -ne 0 ]; then
+#            echo "❌ Can-I-Deploy failed — this version is NOT safe to deploy to $PACT_ENV - (deploy status: $can_i_deploy_status)"
+#            exit 1
+#          else
+#            echo "✅ Can-I-Deploy succeeded — this version is safe to deploy to $PACT_ENV"
+#          fi
 
       - name: Gradle Publish
         if: ${{ inputs.is_publish }}
