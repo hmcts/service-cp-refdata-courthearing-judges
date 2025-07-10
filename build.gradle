@@ -106,13 +106,16 @@ tasks.register('pactVerificationTest', Test) {
     includeTags 'pact'
   }
   failFast = true
-  systemProperty 'pact.broker.url', System.getenv('PACT_BROKER_URL')
-  systemProperty 'pact.broker.token', System.getenv('PACT_BROKER_TOKEN')
-  systemProperty 'pact.provider.version', System.getenv('GIT_COMMIT') ?: 'dev'
-  systemProperty 'pact.provider.branch', System.getenv('GIT_BRANCH')
-  systemProperty 'pact.verifier.publishResults', System.getenv('PACT_VERIFIER_PUBLISH_RESULTS')
-  systemProperty 'pact.broker.host', System.getenv('PACT_BROKER_HOST')
-  systemProperty 'pact.env', System.getenv('PACT_ENV')
+
+  def sysOrEnv = { String key ->
+    System.getProperty(key) ?: System.getenv(key.toUpperCase().replace('.', '_'))
+  }
+  systemProperty 'pact.broker.url', sysOrEnv('pact.broker.url')
+  systemProperty 'pact.broker.token', sysOrEnv('pact.broker.token')
+  systemProperty 'pact.provider.version', sysOrEnv('pact.provider.version')
+  systemProperty 'pact.provider.branch', sysOrEnv('pact.provider.branch')
+  systemProperty 'pact.verifier.publishResults', sysOrEnv('pact.verifier.publishResults')
+  systemProperty 'pact.env', sysOrEnv( 'pact.env') ?: 'local'
   reports {
     junitXml.required.set(true)
     html.required.set(true)
