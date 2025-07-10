@@ -60,7 +60,6 @@ jobs:
     env:
       PACT_BROKER_BASE_URL: "https://hmcts-dts.pactflow.io"
       PACT_ENV: "dev/pactTest"
-      GIT_SHA: ${{ github.sha }}
 
     steps:
       - name: Checkout source code
@@ -94,7 +93,7 @@ jobs:
     needs: [ Artefact-Version, Build ]
     runs-on: ubuntu-latest
     env:
-      GIT_SHA: ${{ env.GIT_SHA}}
+      GIT_SHA: ${{ github.sha }}
       PACT_BROKER_URL: "https://hmcts-dts.pactflow.io"
       PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
       PACT_ENV: ${{ inputs.pact_env }}
