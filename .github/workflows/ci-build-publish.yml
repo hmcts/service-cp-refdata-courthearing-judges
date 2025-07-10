@@ -119,7 +119,7 @@ jobs:
         run: |
           gradle pactVerificationTest \
             -Dpact.provider.version="$ARTEFACT_VERSION" \
-            -Dpact.verifier.publishResults=true \
+            -Dpact.verifier.publishResults='true' \
             -Dpact.provider.branch="$GIT_BRANCH" \
             -Dpact.broker.token="$PACT_BROKER_TOKEN" \
             -Dpact.broker.url="$PACT_BROKER_URL" \
