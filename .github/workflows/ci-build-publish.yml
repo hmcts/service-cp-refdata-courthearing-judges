@@ -25,7 +25,7 @@ on:
       trigger_deploy:
         required: true
         type: boolean
-      pact_application_name:
+      pacticipant:
         required: true
         type: string
       pact_env:
@@ -87,11 +87,11 @@ jobs:
     needs: [ Artefact-Version, Build ]
     runs-on: ubuntu-latest
     env:
-      ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
+      PACT_PROVIDER_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
       PACT_BROKER_URL: "https://hmcts-dts.pactflow.io"
       PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
       PACT_ENV: ${{ inputs.pact_env }}
-      PACT_APPLICATION_NAME: ${{ inputs.pact_application_name }}
+      PACTICIPANT: ${{ inputs.pacticipant }}
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -107,15 +107,23 @@ jobs:
         with:
           gradle-version: current
 
+      # If the results are not published, the Pact Broker will not be able to find the version
       - name: Pact Provider Verification and Publish Results
         env:
-          GIT_BRANCH: ${{ github.ref_name }}
+          PACT_PROVIDER_BRANCH: ${{ github.ref_name }}
           PACT_VERIFIER_PUBLISH_RESULTS: true
         run: |
+          echo "PACT_PROVIDER_VERSION=$PACT_PROVIDER_VERSION"
+          echo "PACT_VERIFIER_PUBLISH_RESULTS=$PACT_VERIFIER_PUBLISH_RESULTS"
+          echo "PACT_PROVIDER_BRANCH=$PACT_PROVIDER_BRANCH"
+          echo "PACT_BROKER_TOKEN=$PACT_BROKER_TOKEN"
+          echo "PACT_BROKER_URL=$PACT_BROKER_URL"
+          echo "PACT_ENV=$PACT_ENV"
+          
           gradle pactVerificationTest \
-            -Dpact.provider.version="$ARTEFACT_VERSION" \
+            -Dpact.provider.version="$PACT_PROVIDER_VERSION" \
             -Dpact.verifier.publishResults="$PACT_VERIFIER_PUBLISH_RESULTS" \
-            -Dpact.provider.branch="$GIT_BRANCH" \
+            -Dpact.provider.branch="$PACT_PROVIDER_BRANCH" \
             -Dpact.broker.token="$PACT_BROKER_TOKEN" \
             -Dpact.broker.url="$PACT_BROKER_URL" \
             -Dpact.env="$PACT_ENV"
@@ -124,7 +132,7 @@ jobs:
 #        with:
 #          pact_broker_token: ${{ secrets.PACT_BROKER_TOKEN }}
 #          artefact_version: ${{ needs.Artefact-Version.outputs.artefact_version }}
-#          pact_application_name: ${{ inputs.pact_application_name }}
+#          pacticipant: ${{ inputs.pacticipant }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -136,8 +144,8 @@ jobs:
       - name: Tag Version
         run: |
           pact-broker create-version-tag \
-            --pacticipant "$PACT_APPLICATION_NAME" \
-            --version "$ARTEFACT_VERSION" \
+            --pacticipant "$PACTICIPANT" \
+            --version "$PACT_PROVIDER_VERSION" \
             --tag "$PACT_ENV" \
             --broker-base-url "$PACT_BROKER_URL" \
             --broker-token "$PACT_BROKER_TOKEN"
@@ -145,8 +153,8 @@ jobs:
       - name: Can I Deploy
         run: |
           pact-broker can-i-deploy \
-            --pacticipant "$PACT_APPLICATION_NAME" \
-            --version "$ARTEFACT_VERSION" \
+            --pacticipant "$PACTICIPANT" \
+            --version "$PACT_PROVIDER_VERSION" \
             --to-environment "$PACT_ENV" \
             --broker-base-url "$PACT_BROKER_URL" \
             --broker-token "$PACT_BROKER_TOKEN" \
