@@ -93,12 +93,11 @@ jobs:
     needs: [ Artefact-Version, Build ]
     runs-on: ubuntu-latest
     env:
-      GIT_SHA: ${{ github.sha }}
+      ARTEFACT_VERSION: ${{ needs.Artefact-Version.outputs.artefact_version }}
       PACT_BROKER_URL: "https://hmcts-dts.pactflow.io"
       PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
       PACT_ENV: ${{ inputs.pact_env }}
       PACT_APPLICATION_NAME: ${{ inputs.pact_application_name }}
-
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -119,7 +118,7 @@ jobs:
           GIT_BRANCH: ${{ github.ref_name }}
         run: |
           gradle pactVerificationTest \
-            -Dpact.provider.version="$GIT_SHA" \
+            -Dpact.provider.version="$ARTEFACT_VERSION" \
             -Dpact.verifier.publishResults=true \
             -Dpact.provider.branch="$GIT_BRANCH" \
             -Dpact.broker.token="$PACT_BROKER_TOKEN" \
@@ -132,19 +131,38 @@ jobs:
       - name: Install Pact CLI
         run: npm install -g @pact-foundation/pact-cli
 
-      - name: Tag Version
+      - name: Publish Tag (if version exists)
         run: |
-          pact-broker create-version-tag \
+          if pact-broker describe-version \
             --pacticipant "$PACT_APPLICATION_NAME" \
-            --tag "$PACT_ENV" \
+            --version "$ARTEFACT_VERSION" \
             --broker-base-url "$PACT_BROKER_URL" \
-            --broker-token "$PACT_BROKER_TOKEN"
+            --broker-token "$PACT_BROKER_TOKEN"; then
+
+            pact-broker create-version-tag \
+              --pacticipant "$PACT_APPLICATION_NAME" \
+              --version "$ARTEFACT_VERSION" \
+              --tag "$PACT_ENV" \
+              --broker-base-url "$PACT_BROKER_URL" \
+              --broker-token "$PACT_BROKER_TOKEN"
+          else
+            echo "::warning::Not tagging. Version $ARTEFACT_VERSION of $PACT_APPLICATION_NAME does not exist in PactFlow."
+          fi
+
+#      - name: Tag Version
+#        run: |
+#          pact-broker create-version-tag \
+#            --pacticipant "$PACT_APPLICATION_NAME" \
+#            --version "$ARTEFACT_VERSION" \
+#            --tag "$PACT_ENV" \
+#            --broker-base-url "$PACT_BROKER_URL" \
+#            --broker-token "$PACT_BROKER_TOKEN"
 
       - name: Can I Deploy
         run: |
           pact-broker can-i-deploy \
             --pacticipant "$PACT_APPLICATION_NAME" \
-            --version "$GIT_SHA" \
+            --version "$ARTEFACT_VERSION" \
             --to-environment "$PACT_ENV" \
             --broker-base-url "$PACT_BROKER_URL" \
             --broker-token "$PACT_BROKER_TOKEN" \
