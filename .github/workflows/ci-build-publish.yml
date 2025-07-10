@@ -83,6 +83,19 @@ jobs:
           echo "Building with ARTEFACT_VERSION=$ARTEFACT_VERSION"
           gradle build -DARTEFACT_VERSION=$ARTEFACT_VERSION
 
+      - name: Extract repo name
+        id: repo_vars
+        run: |
+          repo_name=${GITHUB_REPOSITORY##*/}
+          echo "repo_name=${repo_name}" >> $GITHUB_OUTPUT
+          echo "artefact_name=${repo_name}-${{ needs.Artefact-Version.outputs.artefact_version }}" >> $GITHUB_OUTPUT
+
+      - name: Upload JAR Artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-jar
+          path: build/libs/${{ steps.repo_vars.outputs.artefact_name }}.jar
+
   Provider-Deploy:
     needs: [ Artefact-Version, Build ]
     runs-on: ubuntu-latest
@@ -195,21 +208,8 @@ jobs:
             -DAZURE_DEVOPS_ARTIFACT_USERNAME=$AZURE_DEVOPS_ARTIFACT_USERNAME \
             -DAZURE_DEVOPS_ARTIFACT_TOKEN=$AZURE_DEVOPS_ARTIFACT_TOKEN
 
-      - name: Extract repo name
-        id: repo_vars
-        run: |
-          repo_name=${GITHUB_REPOSITORY##*/}
-          echo "repo_name=${repo_name}" >> $GITHUB_OUTPUT
-          echo "artefact_name=${repo_name}-${{ needs.Artefact-Version.outputs.artefact_version }}" >> $GITHUB_OUTPUT
-
-      - name: Upload JAR Artefact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-jar
-          path: build/libs/${{ steps.repo_vars.outputs.artefact_name }}.jar
-
   Build-Docker:
-    needs: [ Build, Artefact-Version ]
+    needs: [ Provider-Deploy, Build, Artefact-Version ]
     if: ${{ inputs.trigger_docker }}
     runs-on: ubuntu-latest
     steps:
@@ -245,7 +245,7 @@ jobs:
             JAR_FILENAME=${{ needs.Build.outputs.artefact_name }}.jar
 
   Deploy:
-    needs: [ Build, Artefact-Version ]
+    needs: [ Provider-Deploy, Build, Artefact-Version ]
     if: ${{ inputs.trigger_deploy }}
     runs-on: ubuntu-latest
     steps:
