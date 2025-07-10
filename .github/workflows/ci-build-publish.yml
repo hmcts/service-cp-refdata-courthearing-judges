@@ -149,39 +149,6 @@ jobs:
           pacticipant_version: ${{ env.PACT_PROVIDER_VERSION }}
           pact_env: ${{ env.PACT_ENV }}
 
-#      - name: Set up Node.js
-#        uses: actions/setup-node@v4
-#
-#      - name: Install Pact CLI
-#        run: npm install -g @pact-foundation/pact-cli
-#
-#
-#      - name: Tag Version
-#        run: |
-#          pact-broker create-version-tag \
-#            --pacticipant "$PACTICIPANT" \
-#            --version "$PACT_PROVIDER_VERSION" \
-#            --tag "$PACT_ENV" \
-#            --broker-base-url "$PACT_BROKER_URL" \
-#            --broker-token "$PACT_BROKER_TOKEN"
-#
-#      - name: Can I Deploy
-#        run: |
-#          pact-broker can-i-deploy \
-#            --pacticipant "$PACTICIPANT" \
-#            --version "$PACT_PROVIDER_VERSION" \
-#            --to-environment "$PACT_ENV" \
-#            --broker-base-url "$PACT_BROKER_URL" \
-#            --broker-token "$PACT_BROKER_TOKEN" \
-#            --output table
-#          can_i_deploy_status=$?
-#          if [ "$can_i_deploy_status" -ne 0 ]; then
-#            echo "❌ Can-I-Deploy failed — this version is NOT safe to deploy to $PACT_ENV - (deploy status: $can_i_deploy_status)"
-#            exit 1
-#          else
-#            echo "✅ Can-I-Deploy succeeded — this version is safe to deploy to $PACT_ENV"
-#          fi
-
       - name: Gradle Publish
         if: ${{ inputs.is_publish }}
         env:
