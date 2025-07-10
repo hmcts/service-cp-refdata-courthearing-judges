@@ -116,10 +116,11 @@ jobs:
       - name: Pact Provider Verification and Publish Results
         env:
           GIT_BRANCH: ${{ github.ref_name }}
+          PACT_VERIFIER_PUBLISH_RESULTS: 'true'
         run: |
           gradle pactVerificationTest \
             -Dpact.provider.version="$ARTEFACT_VERSION" \
-            -Dpact.verifier.publishResults='true' \
+            -Dpact.verifier.publishResults="$PACT_VERIFIER_PUBLISH_RESULTS" \
             -Dpact.provider.branch="$GIT_BRANCH" \
             -Dpact.broker.token="$PACT_BROKER_TOKEN" \
             -Dpact.broker.url="$PACT_BROKER_URL" \
