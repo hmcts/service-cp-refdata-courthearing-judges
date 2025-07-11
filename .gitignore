@@ -5,9 +5,11 @@ bin/*
 /build/
 /gradlew
 /gradlew.bat
-!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
 *.class
 bin/main/application.yaml
+pmd-dist-*-bin.zip
+pmd-bin-*
 
 ### STS ###
 .apt_generated
