@@ -73,4 +73,16 @@ class JudgesControllerTest {
         assertThat(exception.getReason()).isEqualTo("judgeId is required");
         assertThat(exception.getMessage()).isEqualTo("400 BAD_REQUEST \"judgeId is required\"");
     }
-} 
+
+    @Test
+    void getJudgeById_ShouldReturnBadRequestForInvalidUUID() {
+        String invalidUUID = "not-a-valid-uuid";
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            judgesController.getJudgeById(invalidUUID);
+        });
+
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(exception.getReason()).isEqualTo("Invalid UUID format: " + invalidUUID);
+    }
+}
