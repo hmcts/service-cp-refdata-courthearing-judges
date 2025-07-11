@@ -12,6 +12,8 @@ import uk.gov.hmcts.cp.openapi.api.JudgesApi;
 import uk.gov.hmcts.cp.openapi.model.Judges;
 import uk.gov.hmcts.cp.services.JudgesService;
 
+import java.util.UUID;
+
 import static java.util.UUID.fromString;
 
 @RestController
@@ -31,7 +33,7 @@ public class JudgesController implements JudgesApi {
 
         try{
             sanitizedJudgeId = sanitizeJudgeId(judgeId);
-            judges = judgesService.getJudge(fromString(sanitizedJudgeId));
+            judges = judgesService.getJudge(toUuid(sanitizedJudgeId));
         } catch (ResponseStatusException e) {
             LOG.atError().log(e.getMessage());
             throw e;
@@ -47,6 +49,14 @@ public class JudgesController implements JudgesApi {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "judgeId is required");
         }
         return StringEscapeUtils.escapeHtml4(judgeId);
+    }
+
+    private UUID toUuid(final String uuid) {
+        try {
+            return fromString(uuid);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid UUID format: " + uuid);
+        }
     }
 
 }
