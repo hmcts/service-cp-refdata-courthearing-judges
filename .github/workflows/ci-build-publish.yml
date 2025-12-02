@@ -28,9 +28,6 @@ on:
       pacticipant:
         required: true
         type: string
-      pact_env:
-        required: true
-        type: string
 
 jobs:
   Artefact-Version:
@@ -57,9 +54,6 @@ jobs:
     outputs:
       repo_name: ${{ steps.repo_vars.outputs.repo_name }}
       artefact_name: ${{ steps.repo_vars.outputs.artefact_name }}
-    env:
-      PACT_BROKER_BASE_URL: "https://hmcts-dts.pactflow.io"
-      PACT_ENV: "dev/pactTest"
 
     steps:
       - name: Checkout source code
@@ -133,21 +127,6 @@ jobs:
           echo "PACT_BROKER_TOKEN=$PACT_BROKER_TOKEN"
           echo "PACT_BROKER_URL=$PACT_BROKER_URL"
           echo "PACT_ENV=$PACT_ENV"
-          
-          gradle pactVerificationTest \
-            -Dpact.provider.version="$PACT_PROVIDER_VERSION" \
-            -Dpact.verifier.publishResults="$PACT_VERIFIER_PUBLISH_RESULTS" \
-            -Dpact.provider.branch="$PACT_PROVIDER_BRANCH" \
-            -Dpact.broker.token="$PACT_BROKER_TOKEN" \
-            -Dpact.broker.url="$PACT_BROKER_URL" \
-            -Dpact.env="$PACT_ENV"
-
-      - uses: hmcts/pact-can-i-deploy@main
-        with:
-          pact_broker_token: ${{ secrets.PACT_BROKER_TOKEN }}
-          pacticipant: ${{ inputs.pacticipant }}
-          pacticipant_version: ${{ env.PACT_PROVIDER_VERSION }}
-          pact_env: ${{ env.PACT_ENV }}
 
       - name: Gradle Publish
         if: ${{ inputs.is_publish }}

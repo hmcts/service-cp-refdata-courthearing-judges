@@ -1,8 +1,7 @@
 package uk.gov.hmcts.cp.controllers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +15,10 @@ import java.util.UUID;
 
 import static java.util.UUID.fromString;
 
+@Slf4j
 @RestController
 public class JudgesController implements JudgesApi {
 
-    private static final Logger LOG = LoggerFactory.getLogger(JudgesController.class);
     private final JudgesService judgesService;
 
     public JudgesController(final JudgesService judgesService) {
@@ -31,14 +30,15 @@ public class JudgesController implements JudgesApi {
         final String sanitizedJudgeId;
         final Judges judges;
 
-        try{
+        try {
             sanitizedJudgeId = sanitizeJudgeId(judgeId);
             judges = judgesService.getJudge(toUuid(sanitizedJudgeId));
         } catch (ResponseStatusException e) {
-            LOG.atError().log(e.getMessage());
+            log.error(e.getMessage());
             throw e;
         }
-        LOG.debug("Found Judge response for judgeId: {}", sanitizedJudgeId);
+
+        log.debug("Found Judge response for judgeId: {}", sanitizedJudgeId);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(judges);
@@ -58,5 +58,4 @@ public class JudgesController implements JudgesApi {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid UUID format: " + uuid);
         }
     }
-
 }
