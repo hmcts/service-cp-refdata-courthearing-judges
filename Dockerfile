@@ -29,4 +29,4 @@ RUN chmod 755 /opt/app/app.jar
 # ---- Runtime ----
 EXPOSE 4550
 
-CMD ["java", "-Dcom.sun.net.ssl.checkRevocation=false", "-jar", "/opt/app/app.jar"]
+CMD ["java", "-jar", "/opt/app/app.jar"]
