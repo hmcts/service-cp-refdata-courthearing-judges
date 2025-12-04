@@ -27,24 +27,18 @@ java {
   targetCompatibility = JavaVersion.VERSION_21
 }
 
-//
-// ---- SOURCE SETS ----
-//
+
 sourceSets {
   integrationTest {
     java.srcDir 'src/apiTest/java'
     resources.srcDir 'src/apiTest/resources'
 
-    // correct classpaths — no illegal configuration mutation
     compileClasspath += sourceSets.main.output + configurations.testRuntimeClasspath
     runtimeClasspath += output + compileClasspath
   }
 }
 
-//
-// ---- CONFIGURATIONS ----
-// Only legal extensions — DO NOT change resolvable flags.
-//
+
 configurations {
   integrationTestImplementation.extendsFrom testImplementation
   integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
@@ -68,9 +62,7 @@ tasks.withType(JavaExec).configureEach {
   javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
 }
 
-//
-// ---- UNIT TEST TASK ----
-//
+
 tasks.named('test') {
   useJUnitPlatform{}
   systemProperty 'API_SPEC_VERSION', project.version
@@ -93,9 +85,6 @@ tasks.named('test') {
   }
 }
 
-//
-// ---- INTEGRATION TEST TASK ----
-//
 tasks.register('integration', Test) {
   description = "Runs integration tests in src/apiTest"
   group = "Verification"
@@ -120,9 +109,7 @@ tasks.register('integration', Test) {
   }
 }
 
-//
-// ---- ADD INTO CHECK & BUILD ----
-//
+
 tasks.named('check') {
   dependsOn tasks.named('integration')
 }
@@ -141,7 +128,6 @@ tasks.named('jacocoTestReport') {
   }
 }
 
-// dependencyUpdates rules
 tasks.named("dependencyUpdates").configure {
   def isNonStable = { String version ->
     def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { qualifier ->
@@ -161,7 +147,6 @@ repositories {
   maven { url = azureADOArtifactRepository }
 }
 
-// ---- PUBLISHING ----
 publishing {
   publications {
     mavenJava(MavenPublication) {
@@ -189,7 +174,6 @@ publishing {
   }
 }
 
-// ---- SBOM ----
 cyclonedxBom {
   includeConfigs = ["runtimeClasspath"]
   skipConfigs = ["compileClasspath", "testImplementation"]
