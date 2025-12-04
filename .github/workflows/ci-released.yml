@@ -19,4 +19,4 @@ jobs:
       trigger_docker: true
       trigger_deploy: true
       pacticipant: CPRefDataJudgesProvider
-      pact_env: dev/pactTest
+

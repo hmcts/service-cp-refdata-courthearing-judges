@@ -1,9 +1,8 @@
 package uk.gov.hmcts.cp.controllers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
@@ -12,14 +11,14 @@ import uk.gov.hmcts.cp.openapi.model.JudgesJudiciary;
 import uk.gov.hmcts.cp.repository.InMemoryJudgesRepositoryImpl;
 import uk.gov.hmcts.cp.repository.JudgesRepository;
 import uk.gov.hmcts.cp.services.JudgesService;
+
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Slf4j
 class JudgesControllerTest {
-
-    private static final Logger log = LoggerFactory.getLogger(JudgesControllerTest.class);
 
     private JudgesRepository judgesRepository;
     private JudgesService judgesService;
@@ -35,7 +34,8 @@ class JudgesControllerTest {
     @Test
     void getJudgeById_ShouldReturnJudgesWithOkStatus() {
         UUID judgeId = UUID.randomUUID();
-        log.info("Calling judgesController.getJudgeById with judgeId: {}", judgeId.toString());
+        log.info("Calling judgesController.getJudgeById with judgeId: {}", judgeId);
+
         ResponseEntity<?> response = judgesController.getJudgeById(judgeId.toString());
 
         assertNotNull(response);
@@ -47,6 +47,7 @@ class JudgesControllerTest {
                 .role(JudgesJudiciary.RoleEnum.JUDGE)
                 .johKnownAs("His Honour Judge Smith")
                 .build();
+
         Judges stubbedJudges = new Judges();
         stubbedJudges.setJudiciary(judiciary);
 
@@ -60,6 +61,7 @@ class JudgesControllerTest {
 
         ResponseEntity<Judges> response = judgesController.getJudgeById(unsanitizedCourtId);
         assertNotNull(response);
+
         log.debug("Received response: {}", response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
@@ -69,6 +71,7 @@ class JudgesControllerTest {
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
             judgesController.getJudgeById(null);
         });
+
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(exception.getReason()).isEqualTo("judgeId is required");
         assertThat(exception.getMessage()).isEqualTo("400 BAD_REQUEST \"judgeId is required\"");
