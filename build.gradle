@@ -186,7 +186,11 @@ jar {
   enabled = true
   archiveClassifier.set('plain')
   if (file("CHANGELOG.md").exists()) {
-    from('CHANGELOG.md') { into 'META-INF' }
+    from('CHANGELOG.md') {
+      into 'META-INF'
+    }
+  } else {
+    println "⚠️  CHANGELOG.md not found, skipping inclusion in JAR"
   }
 }
 
