@@ -27,15 +27,23 @@ java {
   targetCompatibility = JavaVersion.VERSION_21
 }
 
+
 sourceSets {
   integrationTest {
-    java {
-      compileClasspath += sourceSets.main.output
-      runtimeClasspath += sourceSets.main.output
-    }
-    resources.srcDir file('src/apiTest/resources')
+    java.srcDir 'src/apiTest/java'
+    resources.srcDir 'src/apiTest/resources'
+
+    compileClasspath += sourceSets.main.output + configurations.testRuntimeClasspath
+    runtimeClasspath += output + compileClasspath
   }
 }
+
+
+configurations {
+  integrationTestImplementation.extendsFrom testImplementation
+  integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
 ext {
   springBootVersion = "4.0.0"
   lombokVersion = "1.18.38"
@@ -44,17 +52,6 @@ ext {
 springBoot {
   buildInfo()
 }
-
-configurations {
-  integrationTestImplementation.extendsFrom testImplementation
-  integrationTestRuntimeOnly.extendsFrom runtimeOnly
-
-  // Ensure testRuntimeClasspath can be resolved for agent injection
-  testRuntimeClasspath {
-    canBeResolved = true
-  }
-}
-
 
 tasks.withType(JavaCompile) {
   options.compilerArgs << "-Xlint:unchecked" << "-Werror"
@@ -65,20 +62,23 @@ tasks.withType(JavaExec).configureEach {
   javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
 }
 
+
 tasks.named('test') {
   useJUnitPlatform{}
   systemProperty 'API_SPEC_VERSION', project.version
   failFast = true
-  // Mockito must be added as an agent, see:
-  // https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+
   jvmArgs += [
-    "-javaagent:${configurations.testRuntimeClasspath.find { it.name.contains('mockito-core') }}", '-Xshare:off'
+          "-javaagent:${configurations.testRuntimeClasspath.find { it.name.contains('mockito-core') }}",
+          '-Xshare:off'
   ]
+
   testLogging {
     events "passed", "skipped", "failed"
     exceptionFormat = 'full'
     showStandardStreams = true
   }
+
   reports {
     junitXml.required.set(true)
     html.required.set(true)
@@ -86,21 +86,32 @@ tasks.named('test') {
 }
 
 tasks.register('integration', Test) {
-  description = "Runs integration tests"
+  description = "Runs integration tests in src/apiTest"
   group = "Verification"
+
   testClassesDirs = sourceSets.integrationTest.output.classesDirs
   classpath = sourceSets.integrationTest.runtimeClasspath
+
   useJUnitPlatform()
+  shouldRunAfter test
+
   failFast = true
+
   testLogging {
     events "passed", "skipped", "failed"
     exceptionFormat = 'full'
     showStandardStreams = true
   }
+
   reports {
     junitXml.required.set(true)
     html.required.set(true)
   }
+}
+
+
+tasks.named('check') {
+  dependsOn tasks.named('integration')
 }
 
 tasks.named('build') {
@@ -117,14 +128,11 @@ tasks.named('jacocoTestReport') {
   }
 }
 
-tasks.named('check') {
-  dependsOn tasks.named('integration')
-}
-
-// check dependencies upon release ONLY
 tasks.named("dependencyUpdates").configure {
   def isNonStable = { String version ->
-    def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { qualifier -> version.toUpperCase().contains(qualifier) }
+    def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { qualifier ->
+      version.toUpperCase().contains(qualifier)
+    }
     def regex = /^[0-9,.v-]+$/
     return !stableKeyword && !(version ==~ regex)
   }
@@ -136,9 +144,7 @@ tasks.named("dependencyUpdates").configure {
 repositories {
   mavenLocal()
   mavenCentral()
-  maven {
-    url = azureADOArtifactRepository
-  }
+  maven { url = azureADOArtifactRepository }
 }
 
 publishing {
@@ -168,8 +174,6 @@ publishing {
   }
 }
 
-//Creation of Software Bill of Materials
-//https://github.com/CycloneDX/cyclonedx-gradle-plugin
 cyclonedxBom {
   includeConfigs = ["runtimeClasspath"]
   skipConfigs = ["compileClasspath", "testImplementation"]
@@ -192,10 +196,7 @@ jar {
 
 bootJar {
   archiveFileName = "${rootProject.name}-${project.version}.jar"
-
-  manifest {
-    attributes('Implementation-Version': project.version.toString())
-  }
+  manifest { attributes('Implementation-Version': project.version.toString()) }
 }
 
 application {
@@ -234,11 +235,9 @@ dependencies {
   implementation 'org.apache.commons:commons-text:1.14.0'
   implementation 'com.fasterxml.jackson.core:jackson-databind:2.19.2'
 
-  // Lombok for main source set
   compileOnly "org.projectlombok:lombok:$lombokVersion"
   annotationProcessor "org.projectlombok:lombok:$lombokVersion"
 
-  // Lombok for test source sets
   testCompileOnly "org.projectlombok:lombok:$lombokVersion"
   testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
 
@@ -246,7 +245,3 @@ dependencies {
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
-
-
-
-
