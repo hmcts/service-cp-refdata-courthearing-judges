@@ -10,7 +10,7 @@ plugins {
   id 'com.gorylenko.gradle-git-properties' version '2.5.4'
 }
 group = 'uk.gov.hmcts.cp'
-version = System.getProperty('API_SPEC_VERSION') ?: '0.0.999'
+version = System.getProperty('ARTEFACT_VERSION') ?: '0.0.999'
 
 apply {
   from("$rootDir/gradle/dependency.gradle")
